@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Analytics & Admin Center | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge bg-danger text-white rounded-pill px-3 py-1 mb-2">
+                <i class="fas fa-chart-line me-1"></i> ADMIN COMMAND CENTER
+            </span>
+            <h2 class="fw-extrabold text-dark mb-1">Rescue Analytics & Network Overview</h2>
+            <p class="text-muted small mb-0">Macro operational metrics, hospital workloads, and AI diagnosis distribution</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/admin/" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                <i class="fas fa-database me-1"></i> Django Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-muted small fw-bold text-uppercase">Total Emergency Calls</span>
+                <h3 class="fw-bold text-dark mb-0">{{ total_reports }}</h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-danger small fw-bold text-uppercase">Active Emergencies</span>
+                <h3 class="fw-bold text-danger mb-0">{{ active_emergencies }}</h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-success small fw-bold text-uppercase">Animals Saved</span>
+                <h3 class="fw-bold text-success mb-0">{{ successful_rescues }}</h3>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-teal small fw-bold text-uppercase">Partner Hospitals</span>
+                <h3 class="fw-bold text-teal mb-0">{{ total_hospitals }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-chart-pie text-teal me-2"></i> Rescues by Animal Species</h5>
+                <div style="height: 260px;">
+                    <canvas id="speciesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-chart-column text-danger me-2"></i> Trauma Severity Triage Breakdown</h5>
+                <div style="height: 260px;">
+                    <canvas id="severityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hospital Performance Leaderboard & Recent Audit Stream -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-hospital me-2 text-primary"></i> Hospital Network Capacity</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Hospital Name</th>
+                                <th>City</th>
+                                <th>Assigned Cases</th>
+                                <th>Ward Capacity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in hospitals %}
+                            <tr>
+                                <td><strong class="text-dark">{{ h.name }}</strong></td>
+                                <td class="text-muted">{{ h.city }}</td>
+                                <td><span class="badge bg-teal text-white">{{ h.total_assigned }}</span></td>
+                                <td>{{ h.current_occupancy }} / {{ h.capacity }} beds</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-timeline text-warning me-2"></i> Recent Audit Log</h5>
+                <div class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+                    {% for log in recent_logs %}
+                    <div class="p-2 bg-light rounded-3 small">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ log.report.tracking_id }} &bull; {{ log.status }}</strong>
+                            <span class="text-muted" style="font-size: 0.75rem;">{{ log.timestamp|timesince }} ago</span>
+                        </div>
+                        <p class="text-muted mb-0" style="font-size: 0.8rem;">{{ log.message|truncatechars:65 }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted small">No audit logs recorded yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Species Chart
+        const speciesLabels = {{ species_labels_json|safe|default:"[]" }};
+        const speciesData = {{ species_data_json|safe|default:"[]" }};
+
+        const ctxSpecies = document.getElementById('speciesChart');
+        if (ctxSpecies && speciesLabels.length > 0) {
+            new Chart(ctxSpecies, {
+                type: 'doughnut',
+                data: {
+                    labels: speciesLabels,
+                    datasets: [{
+                        data: speciesData,
+                        backgroundColor: ['#0f766e', '#10b981', '#f59e0b', '#dc2626', '#8b5cf6', '#64748b'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // Severity Chart
+        const severityLabels = {{ severity_labels_json|safe|default:"[]" }};
+        const severityData = {{ severity_data_json|safe|default:"[]" }};
+
+        const ctxSeverity = document.getElementById('severityChart');
+        if (ctxSeverity) {
+            new Chart(ctxSeverity, {
+                type: 'bar',
+                data: {
+                    labels: severityLabels,
+                    datasets: [{
+                        label: 'Cases',
+                        data: severityData,
+                        backgroundColor: ['#dc2626', '#f97316', '#0284c7', '#16a34a'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

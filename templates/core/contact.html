@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Emergency Contacts & Hotlines | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+            <span class="badge bg-danger bg-opacity-10 text-danger fw-bold px-3 py-1 rounded-pill mb-2">24/7 SUPPORT & DISPATCH</span>
+            <h1 class="fw-extrabold text-dark">Emergency Coordination Contacts</h1>
+            <p class="lead text-muted">
+                Need direct contact with our veterinary dispatchers, hospital coordinators, or administrative team? Reach out below.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-5">
+            <div class="resq-card p-4 bg-teal text-white shadow-sm mb-4" style="background: #0f766e;">
+                <h4 class="fw-bold mb-3"><i class="fas fa-phone-volume me-2"></i> Toll-Free Hotlines</h4>
+                <p class="text-white-50 small mb-4">Dedicated 24/7 animal emergency ambulance networks operating across major municipal districts.</p>
+                
+                <div class="d-flex flex-column gap-3">
+                    <div class="p-3 bg-white bg-opacity-10 rounded-3">
+                        <span class="small text-warning fw-bold d-block">Main Trauma Dispatch:</span>
+                        <h5 class="fw-bold mb-0 text-white">1800-RESQ-PAW (1800-737-7729)</h5>
+                    </div>
+                    <div class="p-3 bg-white bg-opacity-10 rounded-3">
+                        <span class="small text-warning fw-bold d-block">Avian & Wildlife Helpline:</span>
+                        <h5 class="fw-bold mb-0 text-white">1800-WILD-CARE (1800-945-3227)</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resq-card p-4 bg-white shadow-sm border">
+                <h5 class="fw-bold text-dark mb-3"><i class="fas fa-envelope-open-text text-teal me-2"></i> Email Inquiries</h5>
+                <p class="text-muted small mb-1"><strong>Emergency Desk:</strong> alerts@resqpaws.ai</p>
+                <p class="text-muted small mb-1"><strong>Hospital Partnerships:</strong> partners@resqpaws.ai</p>
+                <p class="text-muted small mb-0"><strong>Volunteer Network:</strong> volunteer@resqpaws.ai</p>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="resq-card p-4 p-md-5 bg-white shadow-sm border">
+                <h4 class="fw-bold text-dark mb-4"><i class="fas fa-paper-plane text-teal me-2"></i> Send a Coordination Message</h4>
+                
+                <form method="post" action="{% url 'core:contact' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Your Name *</label>
+                            <input type="text" name="name" class="form-control" placeholder="Jane Doe" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Your Email *</label>
+                            <input type="email" name="email" class="form-control" placeholder="jane@example.com" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Subject / Organization</label>
+                            <input type="text" name="subject" class="form-control" placeholder="e.g. Volunteer Inquiries / Clinic Partnership">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Message *</label>
+                            <textarea name="message" class="form-control" rows="5" placeholder="Write your message here..." required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary-custom w-100 py-3">
+                                <i class="fas fa-paper-plane me-2"></i> Send Message
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

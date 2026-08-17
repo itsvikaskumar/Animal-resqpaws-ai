@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Log In | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="resq-card p-4 p-md-5 bg-white shadow-sm border">
+                <div class="text-center mb-4">
+                    <div class="p-3 bg-teal bg-opacity-10 text-teal rounded-circle d-inline-flex mb-2" style="background:rgba(15,118,110,0.1); color:#0f766e;">
+                        <i class="fas fa-user-lock fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Welcome Back</h3>
+                    <p class="text-muted small">Sign in to your Citizen, Hospital, or Admin account</p>
+                </div>
+
+                <form method="post" action="{% url 'accounts:login' %}">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="Enter your username" required autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-bold">
+                        <i class="fas fa-sign-in-alt me-2"></i> Log In
+                    </button>
+                </form>
+
+                <div class="mt-4 pt-3 border-top text-center small text-muted">
+                    Don't have an account? <a href="{% url 'accounts:register' %}" class="text-teal fw-bold">Sign up here</a>
+                </div>
+
+                <!-- Demo Quick Credential Box for Seamless Evaluation -->
+                <div class="mt-4 p-3 bg-light rounded-3 small">
+                    <span class="fw-bold text-dark d-block mb-1"><i class="fas fa-key text-warning me-1"></i> Demo Quick Logins:</span>
+                    <ul class="list-unstyled mb-0 text-muted" style="font-size: 0.82rem;">
+                        <li><strong>Admin:</strong> <code>admin</code> / <code>admin123</code></li>
+                        <li><strong>Hospital Staff:</strong> <code>vet_staff</code> / <code>staff123</code></li>
+                        <li><strong>Citizen Rescuer:</strong> <code>citizen1</code> / <code>user123</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

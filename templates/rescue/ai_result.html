@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}AI Diagnostics Result - {{ report.tracking_id }} | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Top Success / Triage Bar -->
+            <div class="alert alert-success d-flex align-items-center shadow-sm border-0 mb-4 p-3">
+                <i class="fas fa-check-circle fs-3 text-success me-3"></i>
+                <div>
+                    <h5 class="alert-heading fw-bold mb-0">Emergency Report Successfully Registered & Dispatched!</h5>
+                    <span class="small">Case Reference: <strong>{{ report.tracking_id }}</strong> | Time: {{ report.reported_at|date:"M d, Y - H:i" }}</span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left Column: AI Detection & Annotated Image -->
+                <div class="col-lg-6">
+                    <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="fas fa-microscope text-teal me-2"></i> AI Vision Diagnostic Output
+                            </h5>
+                            <span class="badge bg-dark text-teal"><i class="fas fa-microchip me-1"></i> YOLOv8 / Vision</span>
+                        </div>
+
+                        <!-- Annotated Bounding Box Image Preview -->
+                        <div class="rounded-3 overflow-hidden position-relative bg-dark mb-3 text-center" style="min-height: 250px;">
+                            {% if report.annotated_image %}
+                                <img src="/media/{{ report.annotated_image }}" alt="AI Annotation" class="img-fluid w-100 object-fit-contain" style="max-height: 340px;">
+                            {% elif report.image %}
+                                <img src="{{ report.image.url }}" alt="Uploaded Animal" class="img-fluid w-100 object-fit-contain" style="max-height: 340px;">
+                            {% endif %}
+                        </div>
+
+                        <!-- AI Metrics Grid -->
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <div>
+                                    <span class="text-muted small d-block">Detected Species</span>
+                                    <strong class="text-dark fs-5">{{ report.species_detected_by_ai|default:report.get_species_display }}</strong>
+                                </div>
+                                <span class="badge bg-teal text-white px-3 py-2 fs-6">Confidence: {{ report.ai_confidence }}%</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded-3">
+                                <div>
+                                    <span class="text-muted small d-block">Estimated Injury Severity</span>
+                                    <span class="badge {{ report.severity_badge_class }} fs-6 px-3 py-2">{{ report.get_injury_severity_display }}</span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-muted small d-block">Triage Status</span>
+                                    <span class="fw-bold text-danger"><i class="fas fa-circle-exclamation me-1"></i> Code Red Active</span>
+                                </div>
+                            </div>
+
+                            {% if report.ai_symptoms %}
+                            <div class="p-3 bg-light rounded-3">
+                                <span class="text-muted small d-block mb-1">Detected Symptoms & Trauma Markers</span>
+                                <p class="small text-dark mb-0 fw-semibold">
+                                    <i class="fas fa-triangle-exclamation text-warning me-1"></i> {{ report.ai_symptoms }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Nearest Hospital Allocated & Next Steps -->
+                <div class="col-lg-6">
+                    <div class="resq-card p-4 bg-white shadow-sm border h-100 d-flex flex-column">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fas fa-hospital-user text-primary me-2"></i> Allocated Rescue Center
+                        </h5>
+
+                        {% if report.hospital_assigned %}
+                        <div class="p-4 bg-teal bg-opacity-10 rounded-3 mb-3 border border-teal border-opacity-25" style="background: rgba(15,118,110,0.06);">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold text-dark mb-0">{{ report.hospital_assigned.name }}</h5>
+                                {% if distance_km %}
+                                    <span class="badge bg-success px-2 py-1"><i class="fas fa-location-arrow me-1"></i> {{ distance_km }} km away</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-muted small mb-2"><i class="fas fa-map-pin text-danger me-1"></i> {{ report.hospital_assigned.address }}, {{ report.hospital_assigned.city }}</p>
+                            <p class="text-dark small mb-0 fw-bold"><i class="fas fa-phone text-teal me-1"></i> Emergency Hotline: {{ report.hospital_assigned.phone }}</p>
+                        </div>
+                        {% else %}
+                        <div class="p-3 bg-light rounded-3 mb-3 text-center">
+                            <p class="text-muted small mb-0">Searching for closest available response team in the city perimeter...</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Action Buttons -->
+                        <div class="mt-auto d-flex flex-column gap-3">
+                            <a href="{% url 'rescue:first_aid_case' report.tracking_id %}" class="btn btn-warning btn-lg py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-kit-medical fs-4"></i>
+                                <span>VIEW EMERGENCY FIRST-AID GUIDANCE</span>
+                            </a>
+
+                            <a href="{% url 'rescue:track_rescue' report.tracking_id %}" class="btn btn-primary-custom btn-lg py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-ambulance fs-4"></i>
+                                <span>TRACK AMBULANCE & RESCUE LIVE</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
