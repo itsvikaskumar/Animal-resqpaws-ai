@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}About AI & System Architecture | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center text-center mb-5">
+        <div class="col-lg-8">
+            <span class="badge bg-teal-subtle text-teal fw-bold px-3 py-1 rounded-pill mb-2">SYSTEM ARCHITECTURE</span>
+            <h1 class="fw-extrabold text-dark">Engineering ResQPaws AI</h1>
+            <p class="lead text-muted">
+                Transforming animal emergency rescue through automated computer vision, geospatial routing algorithms, and multi-tier medical dispatch.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-5 align-items-center mb-5">
+        <div class="col-lg-6">
+            <h3 class="fw-bold text-dark mb-3">The Problem: Lost Golden Hours in Animal Rescue</h3>
+            <p class="text-muted">
+                When pedestrians encounter injured stray animals on roads, they face major hurdles:
+            </p>
+            <ul class="text-muted d-flex flex-column gap-2">
+                <li><strong>Unclear Location:</strong> Callers struggle to convey precise GPS pins to rescue hotlines.</li>
+                <li><strong>Unknown Severity:</strong> Hospitals cannot assess whether a case requires an ICU trauma ambulance or simple outpatient wound dressing.</li>
+                <li><strong>Bystander Helplessness:</strong> Citizens do not know proper first-aid and risk causing further harm or suffering animal bites.</li>
+            </ul>
+            <p class="text-muted">
+                <strong>ResQPaws AI solves all three instantly:</strong> accurate image triage, automatic GPS dispatch, and tailored first-aid instructions.
+            </p>
+        </div>
+        <div class="col-lg-6">
+            <div class="resq-card p-4 bg-white shadow-sm border">
+                <h5 class="fw-bold text-teal mb-3"><i class="fas fa-microchip me-2"></i> Technical Specifications</h5>
+                <table class="table table-sm table-borderless small mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted"><strong>Computer Vision:</strong></td>
+                            <td>YOLOv8 & OpenCV contour analysis</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><strong>Backend:</strong></td>
+                            <td>Django 4.2+, Python 3.10+, REST Architecture</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><strong>Geo-Spatial Engine:</strong></td>
+                            <td>Haversine Great-Circle Geocoding & OpenStreetMap</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><strong>Frontend:</strong></td>
+                            <td>HTML5, Modern CSS3, Bootstrap 5, AJAX</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><strong>Triage Levels:</strong></td>
+                            <td>Critical (Code Red), Severe (Amber), Moderate (Yellow), Minor (Green)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

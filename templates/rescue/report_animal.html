@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Injured Animal | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header banner -->
+            <div class="resq-card p-4 bg-white shadow-sm border mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <span class="badge bg-danger text-white rounded-pill px-3 py-1 mb-2">
+                            <i class="fas fa-heart-pulse me-1"></i> EMERGENCY REPORTING
+                        </span>
+                        <h2 class="fw-extrabold text-dark mb-1">Report Injured Animal</h2>
+                        <p class="text-muted small mb-0">Upload a photo to trigger AI injury analysis and automatic ambulance routing</p>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary rounded-pill btn-sm" onclick="triggerGPSLocation()">
+                            <i class="fas fa-crosshairs me-1"></i> Recalibrate GPS
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" id="rescue-form">
+                {% csrf_token %}
+
+                <div class="row g-4">
+                    <!-- Left Column: Photo Upload & AI Scan Preview -->
+                    <div class="col-lg-6">
+                        <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                            <h5 class="fw-bold text-dark mb-3">
+                                <i class="fas fa-camera text-teal me-2"></i> 1. Animal Photo
+                            </h5>
+
+                            <!-- Upload Options -->
+                            <div class="d-flex gap-2 mb-3">
+                                <label for="id_image" class="btn btn-outline-teal flex-fill border-teal text-teal fw-bold" style="border: 2px dashed #0f766e; cursor: pointer; padding: 12px;">
+                                    <i class="fas fa-upload me-1"></i> Upload Image
+                                </label>
+                                <button type="button" id="btn-start-camera" class="btn btn-outline-dark flex-fill" data-bs-toggle="modal" data-bs-target="#cameraModal">
+                                    <i class="fas fa-camera me-1"></i> Use Camera
+                                </button>
+                            </div>
+                            
+                            <input type="file" name="image" id="id_image" class="d-none" accept="image/*" required>
+
+                            <!-- Image Preview & AI Scanner Radar Animation Box -->
+                            <div id="image-preview-container" class="ai-scan-wrapper bg-dark rounded-3 text-center position-relative mb-3 d-none" style="min-height: 260px; max-height: 340px; display: flex; align-items: center; justify-content: center;">
+                                <div class="ai-scan-bar"></div>
+                                <img id="image-preview" src="#" alt="Injured Animal" class="img-fluid rounded-3 object-fit-contain w-100" style="max-height: 330px;">
+                                <div class="position-absolute bottom-0 start-0 m-2">
+                                    <span class="badge bg-dark bg-opacity-75 text-warning border border-warning">
+                                        <i class="fas fa-robot me-1"></i> AI Vision Ready
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Animal Species (Optional Override)</label>
+                                {{ form.species }}
+                                <div class="form-text small">Our AI will detect the species automatically, but you can specify here if known.</div>
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Your Name</label>
+                                    {{ form.reporter_name }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Your Contact Phone</label>
+                                    {{ form.reporter_phone }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: GPS Location & Map -->
+                    <div class="col-lg-6">
+                        <div class="resq-card p-4 bg-white shadow-sm border h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold text-dark mb-0">
+                                    <i class="fas fa-location-dot text-danger me-2"></i> 2. Precise GPS Location
+                                </h5>
+                                <span id="gps-status-badge" class="badge bg-warning text-dark">
+                                    <i class="fas fa-spinner fa-spin me-1"></i> Acquiring GPS...
+                                </span>
+                            </div>
+
+                            <!-- Interactive Leaflet Map -->
+                            <div id="map" class="mb-3 flex-grow-1" style="min-height: 240px;"></div>
+                            
+                            <!-- Hidden Coordinates Form Fields -->
+                            {{ form.latitude }}
+                            {{ form.longitude }}
+
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold small">Detected Address / Street</label>
+                                {{ form.location_address }}
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Landmark / Immediate Surroundings</label>
+                                {{ form.landmark_notes }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Emergency Action Button -->
+                    <div class="col-12 text-center mt-4">
+                        <button type="submit" class="btn btn-emergency btn-lg px-5 py-3 fs-5 shadow-lg w-100">
+                            <i class="fas fa-bolt me-2"></i> SUBMIT & RUN AI EMERGENCY TRIAGE
+                        </button>
+                        <p class="small text-muted mt-2">
+                            <i class="fas fa-shield-alt text-success me-1"></i>
+                            Your report immediately reaches the nearest veterinary ambulance network.
+                        </p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Camera Capture Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="cameraModalLabel"><i class="fas fa-camera me-2 text-warning"></i> Snap Animal Photo</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0 bg-black text-center position-relative">
+        <video id="camera-stream" autoplay playsinline class="w-100" style="max-height: 380px;"></video>
+      </div>
+      <div class="modal-footer justify-content-center bg-light">
+        <button type="button" id="btn-snap-photo" class="btn btn-emergency px-4 py-2">
+            <i class="fas fa-circle-dot me-2"></i> Capture Photo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/geolocation.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const hospitalsData = {{ hospitals_json|safe|default:"[]" }};
+        initRescueMap(28.6139, 77.2090, hospitalsData);
+    });
+</script>
+{% endblock %}

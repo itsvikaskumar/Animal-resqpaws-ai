@@ -3,10 +3,16 @@
 import os
 import sys
 
+<<<<<<< HEAD
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'resqpaws_core.settings')
+=======
+def main():
+    """Run administrative tasks."""
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'resqpaws_project.settings')
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -17,6 +23,9 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
 if __name__ == '__main__':
     main()

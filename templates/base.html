@@ -1,24 +1,48 @@
+<<<<<<< HEAD
+=======
+{% load static %}
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>{% block title %}ResQPaws - Intelligent Animal Emergency Response{% endblock %}</title>
     
+=======
+    <title>{% block title %}ResQPaws AI | Animal Emergency Response & Rescue{% endblock %}</title>
+    <meta name="description" content="AI-powered emergency response and rescue management system for injured stray and domestic animals. Instant AI triage, GPS dispatch, and first-aid guidance.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<<<<<<< HEAD
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Leaflet Map CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <link rel="stylesheet" href="/static/css/custom.css">
+=======
+    <!-- Leaflet Maps CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
+<<<<<<< HEAD
     <!-- Top Emergency Bar -->
     <div class="top-emergency-bar text-white text-center py-1 px-3 d-flex justify-content-between align-items-center">
         <span class="small"><i class="fa-solid fa-truck-medical me-2 animate-bounce"></i> 24/7 Animal Emergency Helpline: <strong>+91 94120 12345</strong> | Toll-Free: <strong>1962</strong></span>
@@ -55,11 +79,96 @@
                         <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-right-to-bracket me-1"></i> Login</a>
                         <a href="{% url 'register' %}" class="btn btn-sm btn-primary"><i class="fa-solid fa-user-plus me-1"></i> Register</a>
                     {% endif %}
+=======
+    <!-- Emergency Hotline Banner -->
+    <div class="emergency-top-bar text-center">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <span><i class="fas fa-bullhorn me-1"></i> 24/7 Animal Emergency Helpline: <strong>1800-RESQ-PAW (1800-737-7729)</strong></span>
+            <div>
+                <span class="d-none d-md-inline">Seconds count! Report injured animals directly:</span>
+                <a href="{% url 'rescue:report_animal' %}" class="fw-bold"><i class="fas fa-camera me-1"></i> Quick AI Report</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-2">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'core:home' %}">
+                <span class="p-2 rounded-3 bg-teal text-white" style="background: #0f766e;"><i class="fas fa-paw"></i></span>
+                <span>ResQ<span class="text-danger">Paws</span> <span class="badge bg-dark fs-6 fw-normal px-2 py-1 text-teal">AI</span></span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#resqNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="resqNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'core:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'report' in request.path %}active text-danger fw-bold{% endif %}" href="{% url 'rescue:report_animal' %}">
+                            <i class="fas fa-plus-circle text-danger me-1"></i> Report Injured Animal
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'first-aid' in request.path %}active{% endif %}" href="{% url 'rescue:first_aid' %}">
+                            <i class="fas fa-kit-medical text-primary me-1"></i> First-Aid Guide
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'core:about' %}">About AI</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'core:contact' %}">Emergency Contact</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3 py-1" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle fs-5 text-teal"></i>
+                                <span>{{ user.username }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><h6 class="dropdown-header text-muted">{{ user.profile.get_role_display }}</h6></li>
+                                <li><a class="dropdown-item" href="{% url 'rescue:user_dashboard' %}"><i class="fas fa-file-waveform me-2 text-teal"></i> My Reports</a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user-gear me-2 text-teal"></i> Profile Settings</a></li>
+                                
+                                {% if user.profile.is_hospital_staff %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-primary fw-bold" href="{% url 'hospitals:dashboard' %}"><i class="fas fa-hospital-user me-2"></i> Hospital Dashboard</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'hospitals:ambulance_management' %}"><i class="fas fa-ambulance me-2"></i> Manage Fleet</a></li>
+                                {% endif %}
+
+                                {% if user.profile.is_admin or user.is_superuser %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger fw-bold" href="{% url 'analytics:admin_dashboard' %}"><i class="fas fa-chart-line me-2"></i> Admin Analytics</a></li>
+                                    <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="fas fa-database me-2"></i> Django Admin</a></li>
+                                {% endif %}
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i> Log Out</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-dark rounded-pill px-3">Login</a>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary-custom rounded-pill px-3">Sign Up</a>
+                    {% endif %}
+
+                    <a href="{% url 'rescue:report_animal' %}" class="btn btn-emergency btn-sm ms-2">
+                        <i class="fas fa-bolt me-1"></i> EMERGENCY REPORT
+                    </a>
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
                 </div>
             </div>
         </div>
     </nav>
 
+<<<<<<< HEAD
     <!-- Global Alert Messages -->
     <div class="container mt-3">
         {% if messages %}
@@ -155,10 +264,90 @@
             <div class="d-flex justify-content-between align-items-center small text-muted">
                 <span>&copy; 2026 ResQPaws. Intelligent Animal Rescue System. All rights reserved.</span>
                 <span>Powered by OpenCV • YOLOv8 • PyTorch • LLM AI</span>
+=======
+    <!-- Message Alerts / Toast Feedback -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm border-0 d-flex align-items-center" role="alert">
+            <i class="fas fa-info-circle me-2 fs-5"></i>
+            <div>{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="text-white fw-bold d-flex align-items-center gap-2">
+                        <i class="fas fa-paw text-success"></i> ResQPaws AI
+                    </h5>
+                    <p class="mt-2 text-muted">
+                        An intelligent AI-powered veterinary emergency response and rescue management network connecting citizens, rescue organizations, and animal hospitals.
+                    </p>
+                    <div class="d-flex gap-3 fs-5 mt-3">
+                        <a href="#" class="text-secondary hover-teal"><i class="fab fa-github"></i></a>
+                        <a href="#" class="text-secondary hover-teal"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-secondary hover-teal"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-secondary hover-teal"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Quick Navigation</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="{% url 'core:home' %}">Home</a></li>
+                        <li><a href="{% url 'rescue:report_animal' %}">Report Injured Animal</a></li>
+                        <li><a href="{% url 'rescue:first_aid' %}">First-Aid Protocols</a></li>
+                        <li><a href="{% url 'core:about' %}">AI Diagnostic Model</a></li>
+                        <li><a href="{% url 'core:contact' %}">Contact Dispatchers</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Portals & Access</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="{% url 'accounts:login' %}">Citizen Portal</a></li>
+                        <li><a href="{% url 'hospitals:dashboard' %}">Hospital & Vet Triage</a></li>
+                        <li><a href="{% url 'hospitals:ambulance_management' %}">Ambulance Fleet Center</a></li>
+                        <li><a href="{% url 'analytics:admin_dashboard' %}">Admin Impact Analytics</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">24/7 Rapid Emergency Response</h6>
+                    <p class="small text-muted mb-2">If you find an animal in immediate life-threatening peril, file a report instantly or contact the regional rescue dispatch:</p>
+                    <div class="p-3 bg-dark rounded-3 border border-secondary border-opacity-25">
+                        <span class="text-warning fw-bold d-block"><i class="fas fa-phone-alt me-1"></i> 1800-737-7729 (Toll-Free)</span>
+                        <span class="small text-white opacity-75">Average ambulance response: 14.5 mins</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary my-4 opacity-25">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center small text-muted">
+                <p class="mb-0">&copy; 2026 ResQPaws AI. Built for Social Impact & Animal Welfare.</p>
+                <div>
+                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3 py-1">
+                        <i class="fas fa-heartbeat me-1"></i> AI Diagnostics: Active
+                    </span>
+                </div>
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50
             </div>
         </div>
     </footer>
 
+<<<<<<< HEAD
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Leaflet JS -->
@@ -167,3 +356,14 @@
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+=======
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Custom Main JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+>>>>>>> d21fd6e5790317efbed53e24688055aae0303c50

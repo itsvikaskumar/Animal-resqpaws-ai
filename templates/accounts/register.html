@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Register | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="resq-card p-4 p-md-5 bg-white shadow-sm border">
+                <div class="text-center mb-4">
+                    <div class="p-3 bg-teal bg-opacity-10 text-teal rounded-circle d-inline-flex mb-2" style="background:rgba(15,118,110,0.1); color:#0f766e;">
+                        <i class="fas fa-user-plus fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Join the Rescue Network</h3>
+                    <p class="text-muted small">Create an account as a Citizen Rescuer, Vet, or Hospital Coordinator</p>
+                </div>
+
+                <form method="post" action="{% url 'accounts:register' %}">
+                    {% csrf_token %}
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger small">
+                            <strong>Please correct the errors below:</strong>
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Account Role *</label>
+                            {{ form.role }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Username *</label>
+                            {{ form.username }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address *</label>
+                            {{ form.email }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Affiliated Hospital (If Staff)</label>
+                            {{ form.hospital }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Password *</label>
+                            {{ form.password }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm Password *</label>
+                            {{ form.confirm_password }}
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-bold">
+                                <i class="fas fa-check-circle me-2"></i> Create Account
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mt-4 pt-3 border-top text-center small text-muted">
+                    Already registered? <a href="{% url 'accounts:login' %}" class="text-teal fw-bold">Log in here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

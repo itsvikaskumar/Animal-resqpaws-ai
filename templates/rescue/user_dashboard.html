@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}My Emergency Reports | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-extrabold text-dark mb-1">My Rescue Reports</h2>
+            <p class="text-muted small mb-0">Track all injured animal reports submitted from your account</p>
+        </div>
+        <a href="{% url 'rescue:report_animal' %}" class="btn btn-emergency">
+            <i class="fas fa-plus-circle me-1"></i> File New Report
+        </a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-muted small fw-bold text-uppercase">Total Reports</span>
+                <h3 class="fw-bold text-dark mb-0">{{ total_reported }}</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-muted small fw-bold text-uppercase">Active En Route</span>
+                <h3 class="fw-bold text-warning mb-0">{{ active_cases }}</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="resq-card p-3 bg-white shadow-sm border text-center">
+                <span class="text-muted small fw-bold text-uppercase">Rescued / Recovered</span>
+                <h3 class="fw-bold text-success mb-0">{{ total_rescued }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Table / Grid -->
+    <div class="resq-card p-4 bg-white shadow-sm border">
+        {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tracking ID</th>
+                        <th>Animal / Photo</th>
+                        <th>AI Severity</th>
+                        <th>Assigned Hospital</th>
+                        <th>Status</th>
+                        <th>Reported At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>
+                            <strong class="text-teal">{{ report.tracking_id }}</strong>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if report.image %}
+                                    <img src="{{ report.image.url }}" alt="{{ report.tracking_id }}" class="rounded" style="width: 42px; height: 42px; object-fit: cover;">
+                                {% endif %}
+                                <span class="fw-semibold">{{ report.get_species_display }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {{ report.severity_badge_class }}">{{ report.get_injury_severity_display }}</span>
+                        </td>
+                        <td>
+                            {% if report.hospital_assigned %}
+                                <span class="small">{{ report.hospital_assigned.name }}</span>
+                            {% else %}
+                                <span class="text-muted small">Pending routing</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ report.status_badge_class }}">{{ report.get_status_display }}</span>
+                        </td>
+                        <td class="small text-muted">
+                            {{ report.reported_at|date:"M d, Y H:i" }}
+                        </td>
+                        <td>
+                            <a href="{% url 'rescue:track_rescue' report.tracking_id %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                <i class="fas fa-route me-1"></i> Track
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="p-3 bg-light text-muted rounded-circle d-inline-flex mb-3">
+                <i class="fas fa-paw fs-1"></i>
+            </div>
+            <h5>No emergency reports submitted yet.</h5>
+            <p class="text-muted small mb-3">If you spot an injured animal on the street, report it immediately to initiate AI rescue dispatch.</p>
+            <a href="{% url 'rescue:report_animal' %}" class="btn btn-primary-custom">
+                <i class="fas fa-camera me-1"></i> Report Animal
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

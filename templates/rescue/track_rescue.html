@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Rescue - {{ report.tracking_id }} | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Case Header -->
+            <div class="resq-card p-4 bg-white shadow-sm border mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h3 class="fw-extrabold text-dark mb-0">Case #{{ report.tracking_id }}</h3>
+                            <span class="badge {{ report.severity_badge_class }}">{{ report.get_injury_severity_display }}</span>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            <strong>{{ report.get_species_display }}</strong> &bull; Reported at {{ report.reported_at|date:"M d, Y - H:i" }} &bull; 
+                            <i class="fas fa-map-pin text-danger me-1"></i> {{ report.location_address|default:"GPS Coordinates Captured" }}
+                        </p>
+                    </div>
+
+                    <div class="text-lg-end">
+                        <span class="text-muted small d-block">Current Status</span>
+                        <span id="live-status-text" class="badge {{ report.status_badge_class }} fs-6 px-3 py-2">
+                            <i class="fas fa-circle-dot fa-fade me-1"></i> {{ report.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mt-4">
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-teal" role="progressbar" style="width: {{ progress_pct }}%; background-color: #0f766e;" aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left: Live Interactive Map & Ambulance Telemetry -->
+                <div class="col-lg-7">
+                    <div class="resq-card p-4 bg-white shadow-sm border mb-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fas fa-map-location-dot text-teal me-2"></i> Live Rescue Telemetry
+                        </h5>
+                        <div id="tracking-map" class="mb-3"></div>
+
+                        {% if report.ambulance_assigned %}
+                        <div class="p-3 bg-light rounded-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="p-2 bg-warning bg-opacity-25 text-warning rounded-circle">
+                                    <i class="fas fa-ambulance fs-4"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0">Ambulance {{ report.ambulance_assigned.vehicle_number }}</h6>
+                                    <span class="small text-muted">Driver: <strong>{{ report.ambulance_assigned.driver_name }}</strong></span>
+                                </div>
+                            </div>
+                            <a href="tel:{{ report.ambulance_assigned.driver_phone }}" class="btn btn-success btn-sm rounded-pill px-3">
+                                <i class="fas fa-phone-alt me-1"></i> Call Driver
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="p-3 bg-light rounded-3 text-center small text-muted">
+                            <i class="fas fa-hourglass-half text-warning me-1"></i> Hospital is dispatching the nearest available emergency response unit.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Right: Status History Timeline & Medical Notes -->
+                <div class="col-lg-5">
+                    <div class="resq-card p-4 bg-white shadow-sm border h-100 d-flex flex-column">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="fas fa-clock-rotate-left text-teal me-2"></i> Rescue Log Timeline
+                        </h5>
+
+                        <div class="timeline-track flex-grow-1">
+                            {% for log in logs %}
+                            <div class="timeline-item">
+                                <div class="timeline-dot {% if forloop.first %}active{% endif %}">
+                                    <i class="fas fa-paw text-white" style="font-size: 8px;"></i>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="text-dark small">{{ log.status }}</strong>
+                                        <span class="text-muted" style="font-size: 0.75rem;">{{ log.timestamp|date:"H:i" }}</span>
+                                    </div>
+                                    <p class="small text-muted mb-0 mt-1">{{ log.message }}</p>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p class="small text-muted">No timeline events recorded yet.</p>
+                            {% endfor %}
+                        </div>
+
+                        {% if report.medical_notes %}
+                        <div class="p-3 bg-light rounded-3 mt-3">
+                            <span class="fw-bold text-dark small d-block mb-1"><i class="fas fa-notes-medical text-teal me-1"></i> Hospital Medical Notes:</span>
+                            <p class="small text-muted mb-0">{{ report.medical_notes }}</p>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4 pt-3 border-top text-center">
+                            <a href="{% url 'rescue:first_aid_case' report.tracking_id %}" class="btn btn-outline-warning w-100 text-dark fw-bold">
+                                <i class="fas fa-kit-medical me-2"></i> Review First-Aid Instructions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/tracker.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const animalLat = {{ report.latitude }};
+        const animalLon = {{ report.longitude }};
+        const hospLat = {% if report.hospital_assigned %}{{ report.hospital_assigned.latitude }}{% else %}null{% endif %};
+        const hospLon = {% if report.hospital_assigned %}{{ report.hospital_assigned.longitude }}{% else %}null{% endif %};
+        const ambLat = {% if report.ambulance_assigned and report.ambulance_assigned.current_latitude %}{{ report.ambulance_assigned.current_latitude }}{% else %}null{% endif %};
+        const ambLon = {% if report.ambulance_assigned and report.ambulance_assigned.current_longitude %}{{ report.ambulance_assigned.current_longitude }}{% else %}null{% endif %};
+        const trackingId = "{{ report.tracking_id }}";
+
+        initLiveTracking(animalLat, animalLon, hospLat, hospLon, ambLat, ambLon, trackingId);
+    });
+</script>
+{% endblock %}

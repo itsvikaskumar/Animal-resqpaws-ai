@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ResQPaws AI - Intelligent Animal Emergency Response & Rescue{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container position-relative z-1">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7 text-center text-lg-start">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white bg-opacity-10 border border-white border-opacity-20 text-warning mb-3 small fw-semibold">
+                    <span class="badge bg-danger text-white rounded-pill px-2 py-0.5">AI POWERED</span>
+                    <span>Saving Injured Animals Across the City in Real-Time</span>
+                </div>
+                <h1 class="hero-title text-white mb-3">
+                    Instant AI Triage & Rapid Rescue for Injured Animals.
+                </h1>
+                <p class="hero-lead mb-4">
+                    Snap a photo of an injured stray or domestic animal. Our AI instantly analyzes species & injury severity, captures GPS coordinates, alerts the nearest hospital, and guides you with life-saving first-aid while the ambulance is en route.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    <a href="{% url 'rescue:report_animal' %}" class="btn btn-emergency btn-lg px-4 py-3 fs-5 shadow">
+                        <i class="fas fa-camera me-2"></i> Report Injured Animal Now
+                    </a>
+                    <a href="{% url 'rescue:first_aid' %}" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill">
+                        <i class="fas fa-kit-medical me-2 text-warning"></i> View First-Aid Guide
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="resq-card p-4 shadow-lg border-0 bg-white text-dark">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0 text-teal"><i class="fas fa-shield-cat text-primary me-2"></i> How ResQPaws Works</h5>
+                        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-2 py-1"><i class="fas fa-circle fa-beat me-1"></i> Live Network</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; min-width:36px;">1</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Snap Photo & Auto-GPS</h6>
+                                <p class="small text-muted mb-0">Upload a picture of the animal. Precise coordinates are captured instantly.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; min-width:36px;">2</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">AI Severity Diagnostics</h6>
+                                <p class="small text-muted mb-0">Deep learning analyzes wounds, fractures, and trauma severity (Critical to Minor).</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; min-width:36px;">3</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Nearest Hospital & Ambulance</h6>
+                                <p class="small text-muted mb-0">Emergency alert dispatched to the nearest shelter or clinic with live tracking.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 align-items-start">
+                            <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; min-width:36px;">4</div>
+                            <div>
+                                <h6 class="fw-bold mb-1">Step-by-Step First-Aid</h6>
+                                <p class="small text-muted mb-0">Follow tailored emergency handling protocols while paramedics rush to the scene.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-center">
+                        <a href="{% url 'rescue:report_animal' %}" class="btn btn-primary-custom w-100 py-2">
+                            <i class="fas fa-bolt me-2"></i> Launch Emergency Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Live Impact Stats Section -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-6 col-md-3">
+                <div class="stat-box shadow-sm h-100">
+                    <div class="stat-number text-teal">{{ STAT_REPORTS }}</div>
+                    <div class="stat-label">Animals Reported</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-box shadow-sm h-100">
+                    <div class="stat-number text-success">{{ STAT_RESCUED }}</div>
+                    <div class="stat-label">Successfully Saved</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-box shadow-sm h-100">
+                    <div class="stat-number text-primary">{{ STAT_HOSPITALS }}</div>
+                    <div class="stat-label">Partner Hospitals</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-box shadow-sm h-100">
+                    <div class="stat-number text-warning">14.5<span class="fs-4">m</span></div>
+                    <div class="stat-label">Avg Ambulance ETA</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Features Breakdown -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge bg-teal-subtle text-teal fw-bold px-3 py-1 rounded-pill mb-2">CUTTING-EDGE FEATURES</span>
+            <h2 class="fw-extrabold text-dark">Why ResQPaws AI Makes a Difference</h2>
+            <p class="text-muted mx-auto" style="max-width: 620px;">
+                Traditional animal reporting suffers from delays, missing location details, and lack of triage. ResQPaws AI bridges this gap with immediate intelligence.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="resq-card p-4 h-100">
+                    <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-3 d-inline-block mb-3 fs-3">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">YOLO & OpenCV AI Vision</h5>
+                    <p class="text-muted small">
+                        Identifies species (Canine, Feline, Avian, Bovine, Wildlife) and highlights trauma areas using wound localization and triage scoring.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="resq-card p-4 h-100">
+                    <div class="p-3 bg-teal bg-opacity-10 text-teal rounded-3 d-inline-block mb-3 fs-3" style="background: rgba(15, 118, 110, 0.1); color: #0f766e;">
+                        <i class="fas fa-map-location-dot"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Automated GPS Allocation</h5>
+                    <p class="text-muted small">
+                        Uses the Haversine geo-spatial algorithm to immediately map the emergency to the closest active veterinary clinic or NGO shelter.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="resq-card p-4 h-100">
+                    <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3 d-inline-block mb-3 fs-3">
+                        <i class="fas fa-kit-medical"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Dynamic First-Aid Protocols</h5>
+                    <p class="text-muted small">
+                        Delivers instant, medically vetted instructions to citizens for bleeding control, fracture stabilization, and shock prevention.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Active Rescue Reports Spotlight -->
+{% if recent_rescues %}
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Recent Emergency Dispatches</h3>
+                <p class="text-muted small mb-0">Live stream of animals receiving medical attention</p>
+            </div>
+            <a href="{% url 'rescue:report_animal' %}" class="btn btn-outline-primary rounded-pill btn-sm">Report Another Case</a>
+        </div>
+
+        <div class="row g-4">
+            {% for report in recent_rescues %}
+            <div class="col-md-6 col-lg-4">
+                <div class="resq-card overflow-hidden h-100 d-flex flex-column">
+                    <div class="position-relative" style="height: 200px; background: #1e293b;">
+                        {% if report.annotated_image %}
+                            <img src="/media/{{ report.annotated_image }}" alt="{{ report.tracking_id }}" class="w-100 h-100 object-fit-cover">
+                        {% elif report.image %}
+                            <img src="{{ report.image.url }}" alt="{{ report.tracking_id }}" class="w-100 h-100 object-fit-cover">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <i class="fas fa-paw fs-1"></i>
+                            </div>
+                        {% endif %}
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge {{ report.severity_badge_class }}">{{ report.get_injury_severity_display }}</span>
+                        </div>
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge {{ report.status_badge_class }}">{{ report.get_status_display }}</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-light text-dark fw-bold">{{ report.tracking_id }}</span>
+                            <span class="small text-muted">{{ report.reported_at|timesince }} ago</span>
+                        </div>
+                        <h5 class="fw-bold mb-1">{{ report.get_species_display }}</h5>
+                        <p class="text-muted small mb-3 flex-grow-1">
+                            <i class="fas fa-location-dot text-danger me-1"></i>
+                            {{ report.location_address|default:"Location Pin Captured"|truncatechars:45 }}
+                        </p>
+
+                        <div class="d-flex gap-2 mt-auto">
+                            <a href="{% url 'rescue:ai_result' report.tracking_id %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                <i class="fas fa-microscope me-1"></i> AI Diagnostics
+                            </a>
+                            <a href="{% url 'rescue:track_rescue' report.tracking_id %}" class="btn btn-primary-custom btn-sm flex-fill">
+                                <i class="fas fa-route me-1"></i> Track Status
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- First-Aid Call to Action Banner -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);">
+    <div class="container text-center py-4">
+        <div class="p-3 bg-white bg-opacity-10 rounded-circle d-inline-flex mb-3">
+            <i class="fas fa-heart-pulse fs-1 text-warning"></i>
+        </div>
+        <h2 class="fw-bold mb-3">Learn Life-Saving Animal First-Aid</h2>
+        <p class="text-white text-opacity-75 mx-auto mb-4" style="max-width: 600px;">
+            Knowing how to handle a bleeding dog, safely transport a bird with a fractured wing, or stabilize a dehydrated cat can save lives before the ambulance arrives.
+        </p>
+        <a href="{% url 'rescue:first_aid' %}" class="btn btn-light btn-lg px-4 py-3 rounded-pill fw-bold text-teal shadow">
+            <i class="fas fa-book-medical me-2"></i> Browse Veterinary Protocols
+        </a>
+    </div>
+</section>
+{% endblock %}

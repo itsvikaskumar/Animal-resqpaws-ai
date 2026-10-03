@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Triage Case {{ report.tracking_id }} | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Back Link -->
+    <a href="{% url 'hospitals:dashboard' %}" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="fas fa-arrow-left me-1"></i> Back to Hospital Dashboard
+    </a>
+
+    <div class="row g-4">
+        <!-- Left: Case Details & Photos -->
+        <div class="col-lg-7">
+            <div class="resq-card p-4 bg-white shadow-sm border mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="fw-extrabold text-dark mb-0">Case #{{ report.tracking_id }}</h3>
+                    <span class="badge {{ report.severity_badge_class }} fs-6">{{ report.get_injury_severity_display }}</span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">Animal Species</span>
+                            <strong class="text-dark">{{ report.get_species_display }} (AI: {{ report.species_detected_by_ai }})</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3">
+                            <span class="text-muted small d-block">AI Diagnostic Confidence</span>
+                            <strong class="text-teal">{{ report.ai_confidence }}% &bull; {{ report.ai_symptoms|default:"Trauma Identified" }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photos Comparison -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <span class="small fw-bold text-muted d-block mb-1">Uploaded Photo:</span>
+                        {% if report.image %}
+                            <img src="{{ report.image.url }}" alt="Original" class="img-fluid rounded-3 border w-100" style="max-height: 250px; object-fit: cover;">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <span class="small fw-bold text-muted d-block mb-1">AI Annotated Bounding Box:</span>
+                        {% if report.annotated_image %}
+                            <img src="/media/{{ report.annotated_image }}" alt="Annotated" class="img-fluid rounded-3 border w-100" style="max-height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="p-4 bg-light text-muted text-center rounded-3 border">No annotation image available</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Reporter & Geo Info -->
+                <div class="p-3 bg-light rounded-3">
+                    <h6 class="fw-bold mb-2 text-dark"><i class="fas fa-user-circle me-1"></i> Citizen Contact & Location</h6>
+                    <p class="small text-muted mb-1"><strong>Reporter:</strong> {{ report.reporter_name }} | <strong>Phone:</strong> {{ report.reporter_phone|default:"N/A" }}</p>
+                    <p class="small text-muted mb-1"><strong>Location:</strong> {{ report.location_address }} (Lat: {{ report.latitude }}, Lon: {{ report.longitude }})</p>
+                    {% if distance_km %}
+                        <p class="small text-success mb-0 fw-bold"><i class="fas fa-route me-1"></i> Distance from this Hospital: {{ distance_km }} km</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Actions - Dispatch Ambulance & Medical Status Updates -->
+        <div class="col-lg-5">
+            <!-- 1. Ambulance Dispatch Card -->
+            <div class="resq-card p-4 bg-white shadow-sm border mb-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="fas fa-truck-medical text-danger me-2"></i> Ambulance Dispatch
+                </h5>
+
+                {% if report.ambulance_assigned %}
+                    <div class="alert alert-warning small mb-3">
+                        <strong class="d-block mb-1">Ambulance Assigned: {{ report.ambulance_assigned.vehicle_number }}</strong>
+                        Driver: {{ report.ambulance_assigned.driver_name }} ({{ report.ambulance_assigned.driver_phone }})<br>
+                        Status: <span class="badge bg-dark">{{ report.ambulance_assigned.get_status_display }}</span>
+                    </div>
+                {% else %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="dispatch">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Select Available Ambulance Unit</label>
+                            <select name="ambulance_id" class="form-select" required>
+                                <option value="">-- Choose Ambulance --</option>
+                                {% for amb in available_ambulances %}
+                                <option value="{{ amb.id }}">{{ amb.vehicle_number }} (Driver: {{ amb.driver_name }})</option>
+                                {% empty %}
+                                <option value="" disabled>No ambulances currently available</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100 fw-bold">
+                            <i class="fas fa-bullhorn me-1"></i> Dispatch Ambulance Now
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <!-- 2. Medical Status & Clinical Note Update Card -->
+            <div class="resq-card p-4 bg-white shadow-sm border">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="fas fa-stethoscope text-teal me-2"></i> Update Medical & Rescue Status
+                </h5>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Update Current Case Status</label>
+                        <select name="status" class="form-select">
+                            {% for val, label in status_choices %}
+                            <option value="{{ val }}" {% if report.status == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Clinical Remarks / Treatment Notes</label>
+                        <textarea name="medical_notes" class="form-control" rows="3" placeholder="e.g. Suture applied, IV fluids administered, fracture stabilized...">{{ report.medical_notes|default:"" }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Post-Rescue / Recovery Photo (Optional)</label>
+                        <input type="file" name="recovery_photo" class="form-control" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 fw-bold">
+                        <i class="fas fa-save me-1"></i> Save Status & Clinical Log
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

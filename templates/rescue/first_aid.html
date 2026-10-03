@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Emergency First-Aid Protocols | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Title & Context -->
+            <div class="text-center mb-4">
+                <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill mb-2">
+                    <i class="fas fa-kit-medical me-1"></i> VETERINARY PROTOCOLS
+                </span>
+                <h2 class="fw-extrabold text-dark">Life-Saving First-Aid Guidance</h2>
+                <p class="text-muted small mx-auto" style="max-width: 600px;">
+                    Follow these step-by-step veterinary instructions to stabilize the animal while the rescue ambulance team is in transit.
+                </p>
+                {% if report %}
+                    <div class="d-inline-flex align-items-center gap-2 p-2 px-3 bg-light rounded-pill border small">
+                        <span>Active Case: <strong>{{ report.tracking_id }}</strong> ({{ report.get_species_display }} - {{ report.get_injury_severity_display }})</span>
+                        <a href="{% url 'rescue:track_rescue' report.tracking_id %}" class="badge bg-teal text-white text-decoration-none">Track Status &rarr;</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Species Selection Pills -->
+            <div class="resq-card p-3 bg-white shadow-sm border mb-4">
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    {% for key, sp in species_list.items %}
+                    <a href="?species={{ key }}&severity={{ selected_severity }}" class="btn btn-sm {% if selected_species == key %}btn-primary-custom{% else %}btn-outline-secondary{% endif %} rounded-pill px-3 py-2">
+                        <i class="fas {{ sp.icon }} me-1"></i> {{ sp.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left: Step-by-Step Critical Actions -->
+                <div class="col-lg-7">
+                    <div class="resq-card p-4 bg-white shadow-sm border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="fas fa-list-check text-teal me-2"></i> {{ guide.severity_info.title }}
+                            </h5>
+                            <span class="badge {{ guide.severity_info.badge_class }}">{{ selected_severity }}</span>
+                        </div>
+
+                        <div class="alert {{ guide.severity_info.alert_class }} small fw-semibold mb-4">
+                            <i class="fas fa-bell me-1"></i> {{ guide.severity_info.urgency }}
+                        </div>
+
+                        <h6 class="fw-bold text-dark mb-3">Emergency Action Steps:</h6>
+                        <div class="d-flex flex-column gap-2 mb-4">
+                            {% for step in guide.severity_info.steps %}
+                            <div class="first-aid-step-card">
+                                <p class="mb-0 text-dark fw-semibold small">{{ step }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <h6 class="fw-bold text-dark mb-2"><i class="fas fa-hand-holding-heart text-danger me-2"></i> Safe Handling Guide:</h6>
+                        <ul class="text-muted small ps-3 mb-0 d-flex flex-column gap-1">
+                            {% for handle in guide.species_info.safe_handling %}
+                            <li>{{ handle }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Right: DOs and DON'Ts -->
+                <div class="col-lg-5">
+                    <div class="d-flex flex-column gap-4">
+                        
+                        <!-- Critical DOs -->
+                        <div class="resq-card p-4 bg-white shadow-sm border border-success border-opacity-50">
+                            <h5 class="fw-bold text-success mb-3">
+                                <i class="fas fa-check-circle me-2"></i> CRITICAL DOs
+                            </h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                {% for do_item in guide.species_info.critical_dos %}
+                                <li class="d-flex align-items-start gap-2 small text-dark">
+                                    <i class="fas fa-check text-success mt-1"></i>
+                                    <span>{{ do_item }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Critical DON'Ts -->
+                        <div class="resq-card p-4 bg-white shadow-sm border border-danger border-opacity-50">
+                            <h5 class="fw-bold text-danger mb-3">
+                                <i class="fas fa-triangle-exclamation me-2"></i> CRITICAL DON'Ts
+                            </h5>
+                            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                                {% for dont_item in guide.species_info.critical_donts %}
+                                <li class="d-flex align-items-start gap-2 small text-dark">
+                                    <i class="fas fa-xmark text-danger mt-1"></i>
+                                    <span>{{ dont_item }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+
+                        {% if report %}
+                        <div class="text-center">
+                            <a href="{% url 'rescue:track_rescue' report.tracking_id %}" class="btn btn-primary-custom w-100 py-3 fw-bold">
+                                <i class="fas fa-route me-2"></i> View Live Ambulance Location
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

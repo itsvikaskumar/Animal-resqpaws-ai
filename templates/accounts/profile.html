@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}User Profile & Rescuer Badge | ResQPaws AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="resq-card p-4 bg-white shadow-sm border text-center">
+                <div class="p-3 bg-teal bg-opacity-10 text-teal rounded-circle d-inline-flex mb-3" style="background:rgba(15,118,110,0.1); color:#0f766e;">
+                    <i class="fas fa-user-shield fs-1"></i>
+                </div>
+                <h4 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                <p class="badge bg-teal text-white mb-2">{{ profile.get_role_display }}</p>
+                <p class="small text-muted mb-3"><i class="fas fa-envelope me-1"></i> {{ user.email }}</p>
+                
+                <hr>
+
+                <div class="text-start">
+                    <span class="small text-muted d-block mb-1"><strong>Affiliated Center:</strong> {{ profile.affiliated_hospital.name|default:"Independent Citizen Rescuer" }}</span>
+                    <span class="small text-muted d-block mb-1"><strong>Phone:</strong> {{ profile.phone|default:"Not specified" }}</span>
+                    <span class="small text-muted d-block"><strong>Member Since:</strong> {{ profile.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="resq-card p-4 p-md-5 bg-white shadow-sm border">
+                <h4 class="fw-bold text-dark mb-4"><i class="fas fa-user-edit text-teal me-2"></i> Update Profile Information</h4>
+                
+                <form method="post" action="{% url 'accounts:profile' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Email Address *</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Residential / Base Address</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
