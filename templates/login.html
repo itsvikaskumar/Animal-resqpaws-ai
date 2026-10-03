@@ -1,0 +1,33 @@
+<!-- templates/login.html -->
+{% extends 'base.html' %}
+{% block title %}Login - ResQPaws{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card p-4 rounded-4 border-0 shadow-lg">
+                <div class="text-center mb-4">
+                    <i class="fa-solid fa-paw fa-3x text-primary mb-2"></i>
+                    <h4 class="fw-bold">Sign In to ResQPaws</h4>
+                    <small class="text-muted">Citizen & Hospital Staff Access</small>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Username</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Password</label>
+                        {{ form.password }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Login</button>
+                </form>
+                <div class="text-center mt-3 small text-muted">
+                    Don't have an account? <a href="{% url 'register' %}" class="text-primary fw-bold">Register here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

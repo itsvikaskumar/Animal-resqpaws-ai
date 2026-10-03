@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ResQPaws - Intelligent Animal Emergency Response{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <link rel="stylesheet" href="/static/css/custom.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Top Emergency Bar -->
+    <div class="top-emergency-bar text-white text-center py-1 px-3 d-flex justify-content-between align-items-center">
+        <span class="small"><i class="fa-solid fa-truck-medical me-2 animate-bounce"></i> 24/7 Animal Emergency Helpline: <strong>+91 94120 12345</strong> | Toll-Free: <strong>1962</strong></span>
+        <a href="{% url 'report_emergency' %}" class="btn btn-sm btn-danger pulse-emergency-btn"><i class="fa-solid fa-triangle-exclamation me-1"></i> REPORT EMERGENCY</a>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm main-nav">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center fw-bold" href="{% url 'home' %}">
+                <div class="brand-icon-box me-2"><i class="fa-solid fa-paw text-primary"></i></div>
+                <span>ResQ<span class="text-primary">Paws</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 fw-semibold">
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}"><i class="fa-solid fa-house me-1"></i> Home</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'report_emergency' %}active{% endif %}" href="{% url 'report_emergency' %}"><i class="fa-solid fa-camera-retro me-1"></i> AI Scan & Report</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'first_aid' %}active{% endif %}" href="{% url 'first_aid' %}"><i class="fa-solid fa-kit-medical me-1"></i> First-Aid Guide</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'track_report' %}active{% endif %}" href="{% url 'track_report' %}"><i class="fa-solid fa-location-crosshairs me-1"></i> Track Report</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}"><i class="fa-solid fa-circle-info me-1"></i> About</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}"><i class="fa-solid fa-phone me-1"></i> Contact & Shelters</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        {% if user.hospital_profile or user.is_staff %}
+                            <a href="{% url 'hospital_dashboard' %}" class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-hospital-user me-1"></i> Hospital Dashboard</a>
+                        {% endif %}
+                        <span class="text-light small me-2"><i class="fa-regular fa-user me-1"></i> {{ user.username }}</span>
+                        <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-danger">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-sm btn-outline-light"><i class="fa-solid fa-right-to-bracket me-1"></i> Login</a>
+                        <a href="{% url 'register' %}" class="btn btn-sm btn-primary"><i class="fa-solid fa-user-plus me-1"></i> Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Alert Messages -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ msg }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content Block -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Circular Voice Assistant Widget (Floating Bottom Left) -->
+    <div class="voice-assistant-container" id="voiceAssistantContainer" title="Click to speak or hear instructions">
+        <button class="voice-assistant-circle" id="voiceAssistantBtn" onclick="toggleVoiceAssistant()">
+            <i class="fa-solid fa-microphone-lines text-white" id="voiceMicIcon"></i>
+            <span class="voice-pulse-ring"></span>
+        </button>
+        <div class="voice-speech-bubble shadow" id="voiceSpeechBubble">
+            <p id="voiceSpeechText" class="mb-1">👋 Hi! I am your ResQPaws Voice Assistant. Click me and I will guide you step-by-step!</p>
+            <div class="d-flex justify-content-between align-items-center border-top pt-1 mt-1">
+                <small class="text-muted" id="voiceStatusLabel">Voice Guide Active</small>
+                <button class="btn btn-link btn-sm p-0 text-primary" onclick="speakCurrentPageGuidance()"><i class="fa-solid fa-volume-high"></i> Listen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Drawer (Floating Bottom Right) -->
+    <div class="ai-chat-launcher" id="aiChatLauncher" onclick="toggleAIChat()">
+        <i class="fa-solid fa-robot"></i>
+        <span class="chat-badge">AI</span>
+    </div>
+
+    <div class="ai-chat-box shadow-lg" id="aiChatBox">
+        <div class="ai-chat-header d-flex justify-content-between align-items-center p-3 text-white">
+            <div class="d-flex align-items-center">
+                <div class="ai-avatar me-2"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <h6 class="mb-0 fw-bold">ResQPaws AI Assistant</h6>
+                    <small class="text-success-light"><i class="fa-solid fa-circle text-success font-xs me-1"></i> Online Veterinary Triage</small>
+                </div>
+            </div>
+            <button class="btn-close btn-close-white" onclick="toggleAIChat()"></button>
+        </div>
+        <div class="ai-chat-messages p-3" id="aiChatMessages">
+            <div class="chat-msg bot-msg">
+                👋 Hello! I can help you with animal emergency first aid, injury evaluation, or finding nearby veterinary shelters. How can I help right now?
+            </div>
+        </div>
+        <div class="ai-chat-input-area p-2 border-top bg-light d-flex gap-2">
+            <input type="text" id="aiChatInput" class="form-control form-control-sm" placeholder="Ask AI veterinary advice..." onkeypress="handleChatKey(event)">
+            <button class="btn btn-primary btn-sm px-3" onclick="sendAIChat()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white pt-5 pb-3 mt-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5 class="fw-bold text-primary"><i class="fa-solid fa-paw me-2"></i>ResQPaws</h5>
+                    <p class="text-muted small">Intelligent Animal Emergency Response and Rescue Management System. Combining OpenCV, YOLOv8 Deep Learning & LLM AI to protect and rescue distressed animals 24/7.</p>
+                    <p class="small text-muted mb-0"><strong>Institution:</strong> Dev Bhoomi Uttarakhand University (DBUU), Dehradun</p>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <h6 class="fw-bold text-light">Quick Links</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url 'home' %}" class="text-muted text-decoration-none">Home</a></li>
+                        <li><a href="{% url 'report_emergency' %}" class="text-muted text-decoration-none">Report Incident</a></li>
+                        <li><a href="{% url 'first_aid' %}" class="text-muted text-decoration-none">First-Aid Guide</a></li>
+                        <li><a href="{% url 'track_report' %}" class="text-muted text-decoration-none">Track Case</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4">
+                    <h6 class="fw-bold text-light">Emergency Contacts</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><i class="fa-solid fa-phone me-2 text-danger"></i> Toll Free: 1962</li>
+                        <li><i class="fa-brands fa-whatsapp me-2 text-success"></i> WhatsApp: +91 94120 12345</li>
+                        <li><i class="fa-solid fa-envelope me-2 text-primary"></i> emergency@resqpaws.org</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4">
+                    <h6 class="fw-bold text-light">MCA Project Synopsis</h6>
+                    <p class="small text-muted">Atrish Thapliyal | Yogesh Bhatt | Vikas Kumar<br>Under the supervision of Mrs. Vaishali Yadav (SoEC, DBUU).</p>
+                </div>
+            </div>
+            <hr class="border-secondary my-3">
+            <div class="d-flex justify-content-between align-items-center small text-muted">
+                <span>&copy; 2026 ResQPaws. Intelligent Animal Rescue System. All rights reserved.</span>
+                <span>Powered by OpenCV • YOLOv8 • PyTorch • LLM AI</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

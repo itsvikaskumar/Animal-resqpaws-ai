@@ -1,0 +1,30 @@
+<!-- templates/register.html -->
+{% extends 'base.html' %}
+{% block title %}Register - ResQPaws{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4 rounded-4 border-0 shadow-lg">
+                <div class="text-center mb-4">
+                    <i class="fa-solid fa-user-plus fa-3x text-primary mb-2"></i>
+                    <h4 class="fw-bold">Create ResQPaws Account</h4>
+                    <small class="text-muted">Join the Community Rescue Network</small>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-2 mb-2">
+                        <div class="col-6"><label class="small fw-bold">First Name</label>{{ form.first_name }}</div>
+                        <div class="col-6"><label class="small fw-bold">Last Name</label>{{ form.last_name }}</div>
+                    </div>
+                    <div class="mb-2"><label class="small fw-bold">Username</label>{{ form.username }}</div>
+                    <div class="mb-2"><label class="small fw-bold">Email Address</label>{{ form.email }}</div>
+                    <div class="mb-2"><label class="small fw-bold">Password</label>{{ form.password }}</div>
+                    <div class="mb-3"><label class="small fw-bold">Confirm Password</label>{{ form.confirm_password }}</div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

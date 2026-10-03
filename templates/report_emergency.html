@@ -1,0 +1,769 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Injured Animal | ResQPaws AI Emergency{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <!-- Top Header Banner -->
+            <div class="card p-4 bg-white shadow-sm border-0 rounded-4 mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <span class="badge bg-danger text-white rounded-pill px-3 py-2 mb-2">
+                            <i class="fa-solid fa-heart-pulse me-1"></i> RESQPAWS EMERGENCY DISPATCH
+                        </span>
+                        <h2 class="fw-extrabold text-dark mb-1">Report Injured Animal</h2>
+                        <p class="text-muted small mb-0">Snap a photo of the injured animal with the back camera to run AI triage & dispatch the nearest ambulance.</p>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary rounded-pill btn-sm fw-bold px-3 py-2" onclick="getUserGPSLocation()">
+                            <i class="fa-solid fa-crosshairs me-1"></i> Recalibrate GPS
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Report Form -->
+            <form id="emergencyReportForm" onsubmit="submitEmergencyReport(event)">
+                {% csrf_token %}
+
+                <!-- Hidden form coordinates & AI fields synced automatically -->
+                <input type="hidden" name="latitude" id="formLat" value="30.3165">
+                <input type="hidden" name="longitude" id="formLng" value="78.0322">
+                <input type="hidden" name="is_animal" id="formIsAnimal" value="false">
+                <input type="hidden" name="animal_type" id="formAnimal" value="Unknown">
+                <input type="hidden" name="injuries" id="formInjuries" value="">
+                <input type="hidden" name="severity" id="formSeverity" value="UNKNOWN">
+                <input type="hidden" name="first_aid_guidance" id="formFirstAid" value="">
+
+                <div class="row g-4">
+                    <!-- Left Column: Back Camera Capture & AI Scan -->
+                    <div class="col-lg-6">
+                        <div class="card p-4 bg-white shadow-sm border-0 rounded-4 h-100">
+                            <h5 class="fw-bold text-dark mb-3">
+                                <i class="fa-solid fa-camera text-primary me-2"></i> 1. Snap Injured Animal Photo
+                            </h5>
+
+                            <!-- Main Action Buttons -->
+                            <div class="d-flex flex-column gap-2 mb-3">
+                                <!-- Click Photo Button (Directly triggers back camera) -->
+                                <button type="button" class="btn btn-warning btn-lg w-100 py-3 fw-bold text-dark shadow-sm border-0" onclick="openBackCamera()">
+                                    <i class="fa-solid fa-camera fa-lg me-2"></i> Click Photo (Back Camera)
+                                    <small class="d-block text-muted mt-1" style="font-size: 11px;">Opens rear camera viewfinder to snap the injured animal</small>
+                                </button>
+
+                                <!-- Gallery Upload (with mobile native back camera support) -->
+                                <label for="imageInput" class="btn btn-outline-primary w-100 py-2 fw-bold text-center" style="border: 2px dashed #0d6efd; cursor: pointer;">
+                                    <i class="fa-solid fa-upload me-2"></i> Or Upload From Phone Gallery
+                                </label>
+                                <!-- capture="environment" ensures back camera is used on mobile file picker -->
+                                <input type="file" id="imageInput" class="d-none" accept="image/*" capture="environment" onchange="handleImageSelected(this)">
+                            </div>
+
+                            <!-- Initial Placeholder Dropzone -->
+                            <div id="dropzonePlaceholder" class="p-4 bg-light border border-dashed rounded-3 text-center text-muted mb-3">
+                                <i class="fa-solid fa-paw fa-3x text-secondary mb-2"></i>
+                                <p class="small mb-0">No animal photo captured yet.<br>Click <strong>Click Photo (Back Camera)</strong> to take a photo of the injured animal.</p>
+                            </div>
+
+                            <!-- Captured Image Preview Box -->
+                            <div id="previewContainer" class="position-relative bg-dark rounded-3 overflow-hidden text-center mb-3 d-none" style="min-height: 240px; max-height: 320px;">
+                                <img id="imagePreview" src="#" alt="Injured Animal Preview" class="img-fluid w-100" style="max-height: 320px; object-fit: contain;">
+                                
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" onclick="resetImageUpload()" title="Remove photo">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <!-- AI Scan Button -->
+                            <div class="mb-3">
+                                <button type="button" id="btnScanAI" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-sm d-none" onclick="runAIScan()">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i> RUN AI INJURY SCAN (YOLOv8)
+                                </button>
+
+                                <!-- Loading Spinner -->
+                                <div id="scanLoading" class="text-center py-3 d-none">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                    <p class="small text-muted mt-2 mb-0 fw-semibold">AI is analyzing species, wounds, and injury severity...</p>
+                                </div>
+                            </div>
+
+                            <!-- AI Result Card -->
+                            <div id="aiResultCard" class="card border-0 bg-light p-3 rounded-3 mb-3 d-none">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <i class="fa-solid fa-robot text-primary me-1"></i> AI Triage Result
+                                    </h6>
+                                    <span id="severityBadge" class="badge bg-warning text-dark px-3 py-1">UNKNOWN</span>
+                                </div>
+                                <div class="small">
+                                    <p class="mb-1"><strong>Species:</strong> <span id="resAnimal">Unknown</span></p>
+                                    <p class="mb-1"><strong>Detected Injuries:</strong> <span id="resInjuries">None</span></p>
+                                    <p class="mb-1"><strong>Condition:</strong> <span id="resSeverityText">Analyzing</span></p>
+                                    <div class="alert alert-info py-2 px-3 mb-0 mt-2">
+                                        <strong class="d-block mb-1"><i class="fa-solid fa-kit-medical me-1"></i> Instant First Aid:</strong>
+                                        <span id="resFirstAid">Please wait for rescue assistance.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reporter Info (Optional) -->
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Reporter Name</label>
+                                    <input type="text" name="reporter_name" class="form-control form-control-sm" placeholder="Your name (optional)">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Contact Phone</label>
+                                    <input type="tel" name="reporter_phone" class="form-control form-control-sm" placeholder="Phone number (optional)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: GPS Location & Nearest Rescue Center -->
+                    <div class="col-lg-6">
+                        <div class="card p-4 bg-white shadow-sm border-0 rounded-4 h-100 d-flex flex-column">
+                            <h5 class="fw-bold text-dark mb-3">
+                                <i class="fa-solid fa-location-dot text-danger me-2"></i> 2. Precise GPS Location & Shelter
+                            </h5>
+
+                            <!-- Leaflet Map -->
+                            <div id="reportMap" class="rounded-3 border mb-3 flex-grow-1" style="min-height: 240px; width: 100%;"></div>
+
+                            <!-- Nearest Shelter Box -->
+                            <div class="card border-0 bg-primary-subtle p-3 rounded-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-primary fw-bold text-uppercase">Nearest Veterinary Center</small>
+                                        <h6 id="shelterName" class="fw-bold text-dark mb-1">Locating nearest shelter...</h6>
+                                        <p id="shelterDist" class="text-muted small mb-0">Searching based on GPS coordinates...</p>
+                                    </div>
+                                    <div id="shelterActionButtons" class="d-flex gap-1"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Landmark / Specific Spot Notes</label>
+                                <textarea name="landmark_notes" class="form-control form-control-sm" rows="2" placeholder="e.g. Near City Park entrance, under the tree..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Emergency Dispatch Button -->
+                    <div class="col-12 text-center mt-4">
+                        <button type="submit" id="btnSubmitReport" class="btn btn-danger btn-lg px-5 py-3 fs-5 shadow-lg w-100 rounded-pill fw-bold">
+                            <i class="fa-solid fa-truck-medical me-2"></i> SUBMIT & DISPATCH AMBULANCE
+                        </button>
+                        <p class="small text-muted mt-2">
+                            <i class="fa-solid fa-shield-halved text-success me-1"></i>
+                            Your report immediately alerts the nearest animal rescue hospital network.
+                        </p>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================
+     LIVE BACK CAMERA VIEWFINDER MODAL
+     ========================================================= -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-labelledby="cameraModalLabel" aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-2xl bg-dark text-white rounded-4 overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="modal-header border-secondary bg-black py-2 px-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-danger rounded-pill px-2 py-1">
+                <i class="fa-solid fa-heart-pulse me-1"></i> RESCUE CAM
+            </span>
+            <span id="activeCameraBadge" class="badge bg-warning text-dark px-3 py-1">Back Camera Active</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="stopBackCamera()"></button>
+      </div>
+      
+      <!-- Live Video Viewfinder with Animal Target Guide -->
+      <div class="modal-body p-0 bg-black text-center position-relative" style="min-height: 380px;">
+        <video id="cameraStream" autoplay playsinline class="w-100" style="max-height: 420px; object-fit: cover;"></video>
+        
+        <!-- Target Reticle Overlay -->
+        <div class="position-absolute top-50 start-50 translate-middle border border-2 border-warning rounded-3" style="width: 78%; height: 72%; pointer-events: none; opacity: 0.9; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);">
+            <div class="position-absolute top-0 start-50 translate-middle-x mt-2 text-warning fw-bold small text-uppercase" style="white-space: nowrap;">
+                <i class="fa-solid fa-crosshairs me-1"></i> Align Injured Animal Here
+            </div>
+        </div>
+      </div>
+      
+      <!-- Shutter Button -->
+      <div class="modal-footer bg-black border-secondary d-flex justify-content-center py-3">
+        <button type="button" class="btn btn-danger btn-lg rounded-circle p-3 shadow-lg" onclick="capturePhotoFromBackCamera()" style="width: 70px; height: 70px;" title="Click Photo">
+            <i class="fa-solid fa-camera fa-2xl"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet Map CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* =========================================================
+   ResQPaws AI Emergency Scan + GPS + Back Camera + Voice
+   ========================================================= */
+
+let map, marker;
+let currentLat = 30.3165;
+let currentLng = 78.0322;
+
+let selectedFile = null;
+let nearestFacilityName = null;
+let cameraStream = null;
+
+
+/* =========================================================
+   PAGE INITIALIZATION
+   ========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    initReportMap();
+
+    if (typeof triggerResqpawsVoice === 'function') {
+        triggerResqpawsVoice('report_started', {});
+    }
+
+    getUserGPSLocation();
+
+    // Stop camera stream when modal is closed
+    const cameraModalEl = document.getElementById('cameraModal');
+    if (cameraModalEl) {
+        cameraModalEl.addEventListener('hidden.bs.modal', stopBackCamera);
+    }
+});
+
+
+/* =========================================================
+   MAP INITIALIZATION (WITH SATELLITE & NORMAL MAP TOGGLE)
+   ========================================================= */
+function initReportMap() {
+    const mapElement = document.getElementById('reportMap');
+    if (!mapElement) return;
+
+    map = L.map('reportMap', {
+        zoomControl: true,
+        attributionControl: true,
+        maxZoom: 18
+    }).setView([currentLat, currentLng], 13);
+
+    // 1. Street Map Layer
+    const streetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        maxNativeZoom: 18,
+        attribution: '&copy; Esri &mdash; OpenStreetMap contributors'
+    });
+
+    // 2. High-Res Satellite View Layer (No grey tiles on zoom)
+    const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        maxNativeZoom: 17,
+        attribution: '&copy; Esri &mdash; Satellite Imagery'
+    });
+
+    // Default layer
+    streetMap.addTo(map);
+
+    // 3. Top-Right Switcher Control
+    const baseMaps = {
+        "🗺️ Normal Map": streetMap,
+        "🛰️ Satellite View": satelliteMap
+    };
+    L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
+    // 4. Draggable GPS Pin
+    marker = L.marker([currentLat, currentLng], { draggable: true }).addTo(map);
+
+    marker.on('dragend', (e) => {
+        const pos = e.target.getLatLng();
+        setCoordinates(pos.lat, pos.lng, true);
+    });
+}
+
+
+/* =========================================================
+   SET GPS COORDINATES
+   ========================================================= */
+function setCoordinates(lat, lng, announce = false) {
+    currentLat = lat;
+    currentLng = lng;
+
+    const latInput = document.getElementById('formLat');
+    const lngInput = document.getElementById('formLng');
+    if (latInput) latInput.value = lat;
+    if (lngInput) lngInput.value = lng;
+
+    if (announce && typeof triggerResqpawsVoice === 'function') {
+        triggerResqpawsVoice('location_detected', {
+            latitude: lat,
+            longitude: lng
+        });
+    }
+
+    fetchNearestShelter(lat, lng);
+}
+
+
+/* =========================================================
+   GET USER GPS LOCATION
+   ========================================================= */
+function getUserGPSLocation() {
+    if (!navigator.geolocation) {
+        console.warn('Geolocation is not supported by this browser.');
+        if (typeof triggerResqpawsVoice === 'function') {
+            triggerResqpawsVoice('location_detected', { fallback: true });
+        }
+        fetchNearestShelter(currentLat, currentLng);
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            currentLat = lat;
+            currentLng = lng;
+
+            if (map) map.setView([lat, lng], 15);
+            if (marker) marker.setLatLng([lat, lng]);
+
+            const latInput = document.getElementById('formLat');
+            const lngInput = document.getElementById('formLng');
+            if (latInput) latInput.value = lat;
+            if (lngInput) lngInput.value = lng;
+
+            if (typeof triggerResqpawsVoice === 'function') {
+                triggerResqpawsVoice('location_detected', {
+                    latitude: lat,
+                    longitude: lng
+                });
+            }
+
+            fetchNearestShelter(lat, lng);
+        },
+        (err) => {
+            console.warn('GPS unavailable:', err.message);
+            fetchNearestShelter(currentLat, currentLng);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+}
+
+
+/* =========================================================
+   FIND NEAREST RESCUE FACILITY
+   ========================================================= */
+async function fetchNearestShelter(lat, lng) {
+    try {
+        if (typeof triggerResqpawsVoice === 'function') {
+            triggerResqpawsVoice('searching_rescue_center', {});
+        }
+
+        const res = await fetch(`/api/find-nearest-shelter/?lat=${lat}&lng=${lng}`);
+        const data = await res.json();
+
+        if (data.success && data.nearest) {
+            const n = data.nearest;
+            nearestFacilityName = n.name;
+
+            const nameEl = document.getElementById('shelterName');
+            const distEl = document.getElementById('shelterDist');
+            const btnEl = document.getElementById('shelterActionButtons');
+
+            if (nameEl) nameEl.innerText = n.name;
+            if (distEl) distEl.innerText = `${n.distance_km} km away | ${n.address}`;
+
+            const phone = n.phone || '';
+            const whatsapp = n.whatsapp || '';
+
+            if (btnEl) {
+                btnEl.innerHTML = `
+                    ${whatsapp ? `<a href="https://wa.me/${whatsapp.replace(/\D/g, '')}" target="_blank" rel="noopener" class="btn btn-sm btn-success"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                    ${phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline-dark"><i class="fa-solid fa-phone"></i></a>` : ''}
+                `;
+            }
+
+            if (typeof triggerResqpawsVoice === 'function') {
+                triggerResqpawsVoice('rescue_center_found', {
+                    name: n.name,
+                    distance_km: n.distance_km,
+                    address: n.address
+                });
+            }
+        } else {
+            const nameEl = document.getElementById('shelterName');
+            const distEl = document.getElementById('shelterDist');
+            if (nameEl) nameEl.innerText = 'No nearby rescue center found';
+            if (distEl) distEl.innerText = 'Please continue with the emergency report.';
+        }
+    } catch (e) {
+        console.error('Nearest facility error:', e);
+        const nameEl = document.getElementById('shelterName');
+        if (nameEl) nameEl.innerText = 'Unable to locate rescue center';
+    }
+}
+
+
+/* =========================================================
+   BACK CAMERA ENGINE (STRICTLY REAR CAMERA FOR ANIMAL)
+   ========================================================= */
+
+/**
+ * Opens Back (Rear) Camera directly when user clicks "Click Photo"
+ */
+async function openBackCamera() {
+    try {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+
+        const video = document.getElementById('cameraStream');
+        if (!video) {
+            alert('Camera display element not found.');
+            return;
+        }
+
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { exact: 'environment' },
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 }
+                },
+                audio: false
+            });
+        } catch (exactErr) {
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1920, min: 1280 },
+                    height: { ideal: 1080, min: 720 }
+                },
+                audio: false
+            });
+        }
+
+        video.srcObject = cameraStream;
+        await video.play();
+
+        const modalEl = document.getElementById('cameraModal');
+        if (modalEl && window.bootstrap) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+    } catch (err) {
+        console.error('Back camera access error:', err);
+        document.getElementById('imageInput').click();
+    }
+}
+
+/**
+ * Turn off Back Camera stream completely
+ */
+function stopBackCamera() {
+    if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+    }
+    const video = document.getElementById('cameraStream');
+    if (video) video.srcObject = null;
+}
+
+/**
+ * Snaps the photo from the back camera stream and attaches it to the report
+ */
+function capturePhotoFromBackCamera() {
+    const video = document.getElementById('cameraStream');
+    if (!video || !cameraStream) {
+        alert('Back camera is not active.');
+        return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob((blob) => {
+        if (!blob) {
+            alert('Failed to capture animal photo.');
+            return;
+        }
+
+        const fileName = `injured_animal_backcam_${Date.now()}.jpg`;
+        selectedFile = new File([blob], fileName, { type: 'image/jpeg' });
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        const imagePreview = document.getElementById('imagePreview');
+        if (imagePreview) imagePreview.src = dataUrl;
+
+        const dropzone = document.getElementById('dropzonePlaceholder');
+        if (dropzone) dropzone.classList.add('d-none');
+
+        const previewContainer = document.getElementById('previewContainer');
+        if (previewContainer) previewContainer.classList.remove('d-none');
+
+        const btnScanAI = document.getElementById('btnScanAI');
+        if (btnScanAI) btnScanAI.classList.remove('d-none');
+
+        const aiResultCard = document.getElementById('aiResultCard');
+        if (aiResultCard) aiResultCard.classList.add('d-none');
+
+        const modalEl = document.getElementById('cameraModal');
+        if (modalEl && window.bootstrap) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+
+        stopBackCamera();
+
+        if (typeof triggerResqpawsVoice === 'function') {
+            triggerResqpawsVoice('image_selected', { fileName: fileName });
+        }
+    }, 'image/jpeg', 0.95);
+}
+
+
+/* =========================================================
+   FILE PICKER / GALLERY SELECTION
+   ========================================================= */
+function handleImageSelected(input) {
+    if (input.files && input.files[0]) {
+        selectedFile = input.files[0];
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById('imagePreview');
+            if (preview) preview.src = e.target.result;
+
+            const dropzone = document.getElementById('dropzonePlaceholder');
+            if (dropzone) dropzone.classList.add('d-none');
+
+            const previewContainer = document.getElementById('previewContainer');
+            if (previewContainer) previewContainer.classList.remove('d-none');
+
+            const btnScan = document.getElementById('btnScanAI');
+            if (btnScan) btnScan.classList.remove('d-none');
+
+            const aiResultCard = document.getElementById('aiResultCard');
+            if (aiResultCard) aiResultCard.classList.add('d-none');
+
+            if (typeof triggerResqpawsVoice === 'function') {
+                triggerResqpawsVoice('image_selected', { fileName: selectedFile.name });
+            }
+        };
+
+        reader.readAsDataURL(selectedFile);
+    }
+}
+
+
+/* =========================================================
+   RESET IMAGE
+   ========================================================= */
+function resetImageUpload() {
+    selectedFile = null;
+
+    const input = document.getElementById('imageInput');
+    if (input) input.value = '';
+
+    const dropzone = document.getElementById('dropzonePlaceholder');
+    if (dropzone) dropzone.classList.remove('d-none');
+
+    const previewContainer = document.getElementById('previewContainer');
+    if (previewContainer) previewContainer.classList.add('d-none');
+
+    const btnScan = document.getElementById('btnScanAI');
+    if (btnScan) btnScan.classList.add('d-none');
+
+    const aiResultCard = document.getElementById('aiResultCard');
+    if (aiResultCard) aiResultCard.classList.add('d-none');
+}
+
+
+/* =========================================================
+   RUN AI IMAGE SCAN
+   ========================================================= */
+async function runAIScan() {
+    if (!selectedFile) {
+        alert('Please snap or select an animal photo first.');
+        return;
+    }
+
+    const btn = document.getElementById('btnScanAI');
+    const loader = document.getElementById('scanLoading');
+
+    if (btn) btn.classList.add('d-none');
+    if (loader) loader.classList.remove('d-none');
+
+    if (typeof triggerResqpawsVoice === 'function') {
+        triggerResqpawsVoice('image_analysis_started', {});
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    try {
+        const res = await fetch('/api/analyze-image/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+        if (loader) loader.classList.add('d-none');
+
+        if (data.success) {
+            const aiCard = document.getElementById('aiResultCard');
+            if (aiCard) aiCard.classList.remove('d-none');
+
+            const animalEl = document.getElementById('resAnimal');
+            if (animalEl) animalEl.innerText = data.animal_type || 'Unknown';
+
+            const injuriesEl = document.getElementById('resInjuries');
+            if (injuriesEl) {
+                injuriesEl.innerText = Array.isArray(data.injuries)
+                    ? data.injuries.join(', ')
+                    : (data.injuries || 'No visible condition detected');
+            }
+
+            const sevTextEl = document.getElementById('resSeverityText');
+            if (sevTextEl) {
+                sevTextEl.innerText = data.severity_text || data.severity_code || 'Unknown';
+            }
+
+            const firstAidEl = document.getElementById('resFirstAid');
+            if (firstAidEl) {
+                firstAidEl.innerText = data.first_aid_guidance || 'Please wait for professional animal rescue assistance.';
+            }
+
+            const badge = document.getElementById('severityBadge');
+            if (badge) {
+                badge.innerText = data.severity_code || 'UNKNOWN';
+                badge.className = data.severity_code === 'CRITICAL'
+                    ? 'badge bg-danger px-3 py-1'
+                    : 'badge bg-warning text-dark px-3 py-1';
+            }
+
+            if (data.processed_image_url) {
+                const imgPrev = document.getElementById('imagePreview');
+                if (imgPrev) imgPrev.src = data.processed_image_url;
+            }
+
+            // Sync hidden inputs
+            const fAnimal = document.getElementById('formAnimal');
+            const fInjuries = document.getElementById('formInjuries');
+            const fSeverity = document.getElementById('formSeverity');
+            const fFirstAid = document.getElementById('formFirstAid');
+            const fIsAnimal = document.getElementById('formIsAnimal');
+
+            if (fIsAnimal) fIsAnimal.value = data.is_animal ? 'true' : 'false';
+            if (fAnimal) fAnimal.value = data.animal_type || 'Unknown';
+            if (fInjuries) fInjuries.value = Array.isArray(data.injuries) ? data.injuries.join(', ') : (data.injuries || 'None detected');
+            if (fSeverity) fSeverity.value = data.severity_code || 'UNKNOWN';
+            if (fFirstAid) fFirstAid.value = data.first_aid_guidance || '';
+
+            if (typeof triggerResqpawsVoice === 'function') {
+                if (!data.is_animal) {
+                    triggerResqpawsVoice('animal_not_confirmed', {});
+                } else {
+                    triggerResqpawsVoice('image_analyzed', {
+                        animal: data.animal_type,
+                        severity: data.severity_code,
+                        injuries: Array.isArray(data.injuries) ? data.injuries.join(', ') : data.injuries
+                    });
+                }
+            }
+        } else {
+            alert('Scan error: ' + (data.error || 'Unable to analyze image.'));
+            if (btn) btn.classList.remove('d-none');
+        }
+    } catch (e) {
+        console.error('AI scan error:', e);
+        if (loader) loader.classList.add('d-none');
+        if (btn) btn.classList.remove('d-none');
+        alert('Server connection error.');
+    }
+}
+
+
+/* =========================================================
+   SUBMIT EMERGENCY REPORT
+   ========================================================= */
+async function submitEmergencyReport(e) {
+    e.preventDefault();
+
+    const form = document.getElementById('emergencyReportForm');
+    const submitBtn = document.getElementById('btnSubmitReport');
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Submitting Emergency Report...`;
+
+    if (typeof triggerResqpawsVoice === 'function') {
+        triggerResqpawsVoice('report_submitting', {});
+    }
+
+    const formData = new FormData(form);
+
+    if (selectedFile) {
+        formData.append('image', selectedFile);
+    }
+
+    try {
+        const res = await fetch('/api/submit-emergency/', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            if (typeof setResqpawsReportId === 'function') {
+                setResqpawsReportId(data.report_id);
+            }
+
+            if (typeof triggerResqpawsVoice === 'function') {
+                triggerResqpawsVoice('report_submitted', {
+                    reportId: data.short_id || data.report_id,
+                    status: data.status,
+                    hospital: data.hospital_name || nearestFacilityName,
+                    ambulanceAssigned: data.ambulance_assigned === true
+                });
+            }
+
+            window.location.href = `/track-report/?report_id=${encodeURIComponent(data.short_id || data.report_id)}`;
+        } else {
+            alert('Error: ' + (data.error || 'Unable to submit emergency report.'));
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="fa-solid fa-truck-medical me-2"></i> SUBMIT & DISPATCH AMBULANCE`;
+        }
+    } catch (err) {
+        console.error('Emergency submission error:', err);
+        alert('Failed to submit emergency report.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<i class="fa-solid fa-truck-medical me-2"></i> SUBMIT & DISPATCH AMBULANCE`;
+    }
+}
+</script>
+{% endblock %}

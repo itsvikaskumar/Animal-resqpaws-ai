@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Animal Emergency First-Aid Guide - ResQPaws{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center max-w-700 mx-auto mb-5">
+        <h6 class="text-primary fw-bold text-uppercase">Emergency Knowledge Base</h6>
+        <h2 class="fw-bold">Step-by-Step Animal First-Aid Guide</h2>
+        <p class="text-muted">Life-saving immediate measures you can take safely before the veterinary rescue team arrives.</p>
+    </div>
+
+    <!-- Animal Tabs -->
+    <ul class="nav nav-pills nav-fill justify-content-center mb-4 gap-2" id="firstAidTab" role="tablist">
+        <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="pill" data-bs-target="#dogTab"><i class="fa-solid fa-dog me-2"></i> Dogs</button></li>
+        <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#catTab"><i class="fa-solid fa-cat me-2"></i> Cats</button></li>
+        <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#cowTab"><i class="fa-solid fa-cow me-2"></i> Cattle / Cows</button></li>
+        <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#birdTab"><i class="fa-solid fa-dove me-2"></i> Birds</button></li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Dog First Aid -->
+        <div class="tab-pane fade show active" id="dogTab">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <div class="text-danger mb-2"><i class="fa-solid fa-droplet fa-2x"></i></div>
+                        <h5 class="fw-bold">Severe Bleeding</h5>
+                        <p class="small text-muted">Apply direct pressure with sterile gauze. Do not remove saturated pads—add more on top. Keep the dog warm and avoid tight tourniquets.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <div class="text-warning mb-2"><i class="fa-solid fa-bone fa-2x"></i></div>
+                        <h5 class="fw-bold">Broken Limbs / Fractures</h5>
+                        <p class="small text-muted">Do not try to set or straighten bones. Move the dog onto a blanket or rigid board. Keep head elevated and transport gently.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <div class="text-primary mb-2"><i class="fa-solid fa-temperature-arrow-up fa-2x"></i></div>
+                        <h5 class="fw-bold">Heatstroke</h5>
+                        <p class="small text-muted">Move to shade immediately. Pour cool (not freezing) water over paws, neck, and belly. Offer small sips of water.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cat First Aid -->
+        <div class="tab-pane fade" id="catTab">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <h5 class="fw-bold text-primary">Gentle Restraint (Towel Wrap)</h5>
+                        <p class="small text-muted">Injured cats panic and scratch. Wrap the cat gently like a burrito in a thick towel, exposing only the injured area for emergency inspection.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <h5 class="fw-bold text-danger">Choking / Airway Obstruction</h5>
+                        <p class="small text-muted">Check mouth carefully without getting bitten. If an object is visible, use tweezers to dislodge it. Do not push foreign objects deeper.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cow First Aid -->
+        <div class="tab-pane fade" id="cowTab">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <h5 class="fw-bold text-success">Roadside Accident & Trauma</h5>
+                        <p class="small text-muted">Cordon off oncoming traffic. Provide shade and clean water. Do not force a down cow to stand up. Alert large-animal veterinary rescue immediately.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm h-100">
+                        <h5 class="fw-bold text-warning">Maggot Wounds / Lesions</h5>
+                        <p class="small text-muted">Clean surrounding dirt with saline solution. Apply eucalyptus or neem oil spray to keep flies away until veterinary wound debridement.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bird First Aid -->
+        <div class="tab-pane fade" id="birdTab">
+            <div class="row g-4">
+                <div class="col-md-12">
+                    <div class="card p-4 rounded-4 border-0 shadow-sm">
+                        <h5 class="fw-bold text-primary">Wing Injury & Manja Cuts</h5>
+                        <p class="small text-muted">Place the bird in a cardboard box with air holes and soft cloth at the bottom. Keep in a dark, warm, silent room. Do not force water down its throat.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

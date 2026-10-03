@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}About ResQPaws - MCA Project Synopsis{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row g-5 align-items-center">
+        <div class="col-lg-7">
+            <span class="badge bg-primary px-3 py-2 mb-3">Academic MCA Project Synopsis</span>
+            <h2 class="fw-bold mb-3">ResQPaws: Intelligent Animal Emergency Response and Rescue Management System</h2>
+            <p class="lead text-muted">Designed and developed at <strong>Dev Bhoomi Uttarakhand University (DBUU), Dehradun</strong>.</p>
+            <p class="text-muted">ResQPaws bridges the critical time gap between discovering an injured animal and getting professional veterinary care. It features a complete pipeline of <strong>OpenCV image preprocessing, YOLOv8 visual object detection, automated severity estimation, and LLM AI first-aid triage</strong>.</p>
+            <div class="p-4 bg-light rounded-4 border my-4">
+                <h6 class="fw-bold mb-2">Project Team Members:</h6>
+                <ul class="mb-0 text-muted small">
+                    <li><strong>Atrish Thapliyal</strong> (25MCA0051)</li>
+                    <li><strong>Yogesh Bhatt</strong> (25MCA0073)</li>
+                    <li><strong>Vikas Kumar</strong> (25MCA0033)</li>
+                    <li class="mt-2 text-primary"><strong>Supervisor:</strong> Mrs. Vaishali Yadav (Department of Computer Application, SoEC)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center">
+            <div class="p-4 bg-white rounded-4 shadow-sm border">
+                <i class="fa-solid fa-paw fa-4x text-primary mb-3"></i>
+                <h5 class="fw-bold">ResQPaws Architecture</h5>
+                <p class="small text-muted">Image $\to$ OpenCV $\to$ YOLOv8 $\to$ Severity Engine $\to$ LLM Agent $\to$ GPS Auto-Dispatch</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

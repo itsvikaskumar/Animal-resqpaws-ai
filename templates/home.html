@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block title %}ResQPaws - AI-Powered Animal Emergency Rescue Platform{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5 position-relative text-white">
+    <div class="container py-lg-4">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill fw-bold mb-3">
+                    <i class="fa-solid fa-bolt me-1"></i> AI-Assisted Rapid Response System
+                </span>
+                <h1 class="display-4 fw-extrabold mb-3 leading-tight">
+                    Instant AI Visual Detection & Emergency Rescue For <span class="text-primary-gradient">Injured Animals</span>
+                </h1>
+                <p class="lead text-light-50 mb-4">
+                    Upload a photo of any distressed animal. Our <strong>OpenCV & YOLOv8</strong> engine scans the injury, estimates apparent severity, generates instant <strong>AI First-Aid</strong>, and dispatches the nearest animal ambulance.
+                </p>
+                
+                <!-- Action Buttons with Click Photo Option -->
+                <div class="d-flex flex-wrap gap-3">
+                    <!-- Scan & Report Button -->
+                    <a href="{% url 'report_emergency' %}" class="btn btn-danger btn-lg px-4 py-3 shadow-lg pulse-hero-btn">
+                        <i class="fa-solid fa-magnifying-glass-plus me-2"></i> Scan & Report Emergency
+                    </a>
+
+                    <!-- Direct Click Photo Camera Button -->
+                    <button type="button" class="btn btn-warning btn-lg text-dark px-4 py-3 fw-bold shadow-lg" onclick="openHomeCamera()">
+                        <i class="fa-solid fa-camera me-2"></i> Click Photo
+                    </button>
+
+                    <!-- Track Ambulance Button -->
+                    <a href="{% url 'track_report' %}" class="btn btn-outline-light btn-lg px-4 py-3">
+                        <i class="fa-solid fa-truck-medical me-2"></i> Track Ambulance Live
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center">
+                <div class="hero-card shadow-2xl p-4 bg-white text-dark rounded-4 border-0 position-relative">
+                    <div class="hero-card-badge">OpenCV & YOLOv8 Live Pipeline</div>
+                    <div class="scanner-preview-box my-3 position-relative overflow-hidden rounded-3">
+                        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=700&auto=format&fit=crop&q=80" alt="Animal Scan" class="img-fluid rounded-3">
+                        <div class="scan-laser-line"></div>
+                        <div class="scan-overlay-tag top-left">Dog (98% Conf)</div>
+                        <div class="scan-overlay-tag bottom-right bg-danger text-white">Wound Detected (Severity: Moderate)</div>
+                    </div>
+                    <h6 class="fw-bold mb-1">Instant Computer Vision Triage</h6>
+                    <p class="text-muted small mb-0">Automatic GPS Geo-tagging & Nearest Shelter Match within 3 seconds.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats -->
+<section class="py-4 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center g-3">
+            <div class="col-md-3 col-6">
+                <h3 class="fw-bold mb-0">{{ total_rescues }}+</h3>
+                <small class="text-white-50">Animals Rescued</small>
+            </div>
+            <div class="col-md-3 col-6">
+                <h3 class="fw-bold mb-0">8 Supported Species</h3>
+                <small class="text-white-50">Dogs, Cats, Cows, Horses & more</small>
+            </div>
+            <div class="col-md-3 col-6">
+                <h3 class="fw-bold mb-0">&lt; 15 Mins</h3>
+                <small class="text-white-50">Average Ambulance ETA</small>
+            </div>
+            <div class="col-md-3 col-6">
+                <h3 class="fw-bold mb-0">24 / 7 Live</h3>
+                <small class="text-white-50">Hospital Emergency Network</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <h6 class="text-primary fw-bold text-uppercase">Workflow & Technology</h6>
+            <h2 class="fw-bold">How ResQPaws AI Protects Animals</h2>
+            <p class="text-muted">An end-to-end intelligent pipeline connecting citizens, deep learning computer vision, and veterinary hospitals.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="step-card p-4 bg-white rounded-4 shadow-sm h-100 border-0 text-center">
+                    <div class="step-icon text-primary mb-3"><i class="fa-solid fa-camera-retro fa-2x"></i></div>
+                    <span class="step-number">01</span>
+                    <h5 class="fw-bold">1. Capture / Upload</h5>
+                    <p class="text-muted small">Snap a photo on your phone or upload an image of the injured stray or domestic animal.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card p-4 bg-white rounded-4 shadow-sm h-100 border-0 text-center">
+                    <div class="step-icon text-warning mb-3"><i class="fa-solid fa-brain fa-2x"></i></div>
+                    <span class="step-number">02</span>
+                    <h5 class="fw-bold">2. YOLOv8 & OpenCV</h5>
+                    <p class="text-muted small">AI scans animal class, locates visible injuries/bleeding, and calculates Minor vs Critical severity.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card p-4 bg-white rounded-4 shadow-sm h-100 border-0 text-center">
+                    <div class="step-icon text-success mb-3"><i class="fa-solid fa-kit-medical fa-2x"></i></div>
+                    <span class="step-number">03</span>
+                    <h5 class="fw-bold">3. LLM First-Aid</h5>
+                    <p class="text-muted small">Instant expert first aid advice is provided to stabilize the animal while rescue is dispatched.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="step-card p-4 bg-white rounded-4 shadow-sm h-100 border-0 text-center">
+                    <div class="step-icon text-danger mb-3"><i class="fa-solid fa-truck-medical fa-2x"></i></div>
+                    <span class="step-number">04</span>
+                    <h5 class="fw-bold">4. Auto Ambulance</h5>
+                    <p class="text-muted small">GPS auto-locates nearest shelter. Critical cases trigger live ambulance dispatch with live map tracking.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Nearby Animal Shelters & Direct WhatsApp/Email Contact -->
+<section class="py-5">
+    <div class="container py-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h6 class="text-primary fw-bold text-uppercase">Emergency Network</h6>
+                <h2 class="fw-bold mb-0">Partner Veterinary Hospitals & Shelters</h2>
+            </div>
+            <a href="{% url 'contact' %}" class="btn btn-outline-primary btn-sm">View Full Directory <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+        <div class="row g-4">
+            {% for h in hospitals %}
+            <div class="col-md-4">
+                <div class="card shelter-card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold text-dark mb-0">{{ h.name }}</h5>
+                            <span class="badge bg-success-subtle text-success border border-success"><i class="fa-solid fa-clock me-1"></i> 24/7</span>
+                        </div>
+                        <p class="text-muted small mb-3"><i class="fa-solid fa-location-dot text-danger me-1"></i> {{ h.address }}, {{ h.city }}</p>
+                        
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <a href="tel:{{ h.phone }}" class="btn btn-outline-dark btn-sm text-start"><i class="fa-solid fa-phone text-primary me-2"></i> {{ h.phone }}</a>
+                            <div class="d-flex gap-2">
+                                <a href="https://wa.me/{{ h.whatsapp|default:h.phone|cut:' '|cut:'+' }}?text=Emergency%20Animal%20Rescue%20Alert" target="_blank" class="btn btn-success btn-sm flex-fill">
+                                    <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp
+                                </a>
+                                <a href="mailto:{{ h.email }}?subject=Emergency%20Animal%20Rescue" class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fa-solid fa-envelope me-1"></i> Email
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted">
+                            <span><i class="fa-solid fa-truck me-1"></i> Ambulance: {% if h.has_ambulance %}<strong class="text-success">Available</strong>{% else %}No{% endif %}</span>
+                            <span class="text-primary fw-semibold"><i class="fa-solid fa-map-pin me-1"></i> {{ h.city }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center text-muted py-4">No hospitals registered yet. Run seed command to populate demo hospitals.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Click Photo / Camera Capture Modal -->
+<div class="modal fade" id="homeCameraModal" tabindex="-1" aria-labelledby="homeCameraModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg overflow-hidden">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fw-bold" id="homeCameraModalLabel">
+            <i class="fa-solid fa-camera text-warning me-2"></i> Snap Animal Photo
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="stopHomeCamera()"></button>
+      </div>
+      
+      <div class="modal-body p-0 bg-black text-center position-relative" style="min-height: 320px;">
+        <!-- Live Video Viewfinder -->
+        <video id="homeCameraStream" autoplay playsinline class="w-100" style="max-height: 400px; object-fit: cover;"></video>
+        
+        <!-- Snapshot Preview (shown after capture) -->
+        <div id="homePhotoPreviewBox" class="d-none position-relative">
+            <img id="homeCapturedImage" src="#" alt="Captured Animal" class="img-fluid w-100" style="max-height: 400px; object-fit: contain;">
+        </div>
+      </div>
+
+      <div class="modal-footer justify-content-between bg-light">
+        <!-- Retake button (hidden until photo is snapped) -->
+        <button type="button" id="btnRetakePhoto" class="btn btn-outline-secondary d-none" onclick="retakeHomePhoto()">
+            <i class="fa-solid fa-rotate-left me-1"></i> Retake
+        </button>
+        
+        <!-- Snap button -->
+        <button type="button" id="btnSnapPhoto" class="btn btn-danger px-4 py-2 mx-auto fw-bold" onclick="takeHomePhoto()">
+            <i class="fa-solid fa-circle-dot me-2"></i> Capture Photo
+        </button>
+
+        <!-- Proceed to Report Button -->
+        <button type="button" id="btnProceedReport" class="btn btn-success px-4 py-2 d-none fw-bold" onclick="proceedToReport()">
+            <i class="fa-solid fa-bolt me-2"></i> Run AI Emergency Scan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let homeStream = null;
+let capturedDataUrl = null;
+
+async function openHomeCamera() {
+    try {
+        const video = document.getElementById('homeCameraStream');
+        const previewBox = document.getElementById('homePhotoPreviewBox');
+        const snapBtn = document.getElementById('btnSnapPhoto');
+        const retakeBtn = document.getElementById('btnRetakePhoto');
+        const proceedBtn = document.getElementById('btnProceedReport');
+
+        // Reset UI state
+        video.classList.remove('d-none');
+        previewBox.classList.add('d-none');
+        snapBtn.classList.remove('d-none');
+        retakeBtn.classList.add('d-none');
+        proceedBtn.classList.add('d-none');
+
+        // Request camera with mobile rear camera preference
+        homeStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: 'environment' },
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        });
+
+        video.srcObject = homeStream;
+        await video.play();
+
+        const modalEl = document.getElementById('homeCameraModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+
+    } catch (err) {
+        console.error('Camera access error:', err);
+        alert('Could not access camera. Please check your browser permissions.');
+    }
+}
+
+function stopHomeCamera() {
+    if (homeStream) {
+        homeStream.getTracks().forEach(t => t.stop());
+        homeStream = null;
+    }
+    const video = document.getElementById('homeCameraStream');
+    if (video) video.srcObject = null;
+}
+
+function takeHomePhoto() {
+    const video = document.getElementById('homeCameraStream');
+    if (!video || !homeStream) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    capturedDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+    // Show preview & update buttons
+    document.getElementById('homeCapturedImage').src = capturedDataUrl;
+    video.classList.add('d-none');
+    document.getElementById('homePhotoPreviewBox').classList.remove('d-none');
+
+    document.getElementById('btnSnapPhoto').classList.add('d-none');
+    document.getElementById('btnRetakePhoto').classList.remove('d-none');
+    document.getElementById('btnProceedReport').classList.remove('d-none');
+
+    stopHomeCamera();
+}
+
+function retakeHomePhoto() {
+    openHomeCamera();
+}
+
+function proceedToReport() {
+    if (capturedDataUrl) {
+        // Save image into sessionStorage so the emergency report page can automatically load and scan it
+        sessionStorage.setItem('resqpaws_captured_photo', capturedDataUrl);
+    }
+    window.location.href = "{% url 'report_emergency' %}";
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const modalEl = document.getElementById('homeCameraModal');
+    if (modalEl) {
+        modalEl.addEventListener('hidden.bs.modal', stopHomeCamera);
+    }
+});
+</script>
+{% endblock %}

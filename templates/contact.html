@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Contact & Rescue Shelters - ResQPaws{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card p-4 rounded-4 border-0 shadow-sm">
+                <h4 class="fw-bold mb-3"><i class="fa-solid fa-headset text-primary me-2"></i> Get in Touch / Report Inquiry</h4>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Your Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="Enter name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Email / Phone</label>
+                        <input type="text" name="contact" class="form-control" placeholder="Gmail or Phone number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Message / Query</label>
+                        <textarea name="message" class="form-control" rows="4" placeholder="How can we help?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">Send Message</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-hospital text-danger me-2"></i> Direct Shelter Contact Directory</h4>
+            <div class="d-flex flex-column gap-3">
+                {% for h in hospitals %}
+                <div class="p-3 bg-white rounded-3 shadow-sm border">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="fw-bold mb-1">{{ h.name }}</h6>
+                        <span class="badge bg-primary-subtle text-primary">{{ h.city }}</span>
+                    </div>
+                    <p class="small text-muted mb-2"><i class="fa-solid fa-location-dot me-1 text-danger"></i> {{ h.address }}</p>
+                    <div class="d-flex gap-2">
+                        <a href="https://wa.me/{{ h.whatsapp|default:h.phone|cut:' '|cut:'+' }}" target="_blank" class="btn btn-success btn-sm flex-fill"><i class="fa-brands fa-whatsapp me-1"></i> WhatsApp</a>
+                        <a href="mailto:{{ h.email }}" class="btn btn-outline-primary btn-sm flex-fill"><i class="fa-solid fa-envelope me-1"></i> Email</a>
+                        <a href="tel:{{ h.phone }}" class="btn btn-outline-dark btn-sm flex-fill"><i class="fa-solid fa-phone me-1"></i> Call</a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No shelters currently listed.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

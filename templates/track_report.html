@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Live Emergency Rescue - ResQPaws{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Search Case Form -->
+    <div class="card shadow-sm border-0 rounded-4 p-4 mb-4 bg-primary text-white">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-1"><i class="fa-solid fa-truck-medical me-2"></i> Live Emergency Rescue Tracker</h4>
+                <p class="small text-white-50 mb-0">Enter your 8-digit or full Case Report ID to track the assigned rescue team, live ambulance GPS, and hospital treatment progress.</p>
+            </div>
+            <div class="col-md-4 mt-3 mt-md-0">
+                <form method="GET" action="{% url 'track_report' %}" class="d-flex gap-2">
+                    <input type="text" name="report_id" value="{{ query_id }}" class="form-control" placeholder="e.g. d54b79ca" required>
+                    <button type="submit" class="btn btn-warning fw-bold px-3">Track</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if report %}
+    <div class="row g-4">
+        <!-- Status Stepper & Case Info -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge bg-secondary font-xs">CASE ID</span>
+                        <h5 class="fw-bold mb-0">#{{ report.report_id|stringformat:".8s" }}</h5>
+                    </div>
+                    <span class="badge {% if report.apparent_severity == 'CRITICAL' %}bg-danger{% elif report.apparent_severity == 'MODERATE' %}bg-warning text-dark{% else %}bg-success{% endif %} px-3 py-1">
+                        {{ report.get_apparent_severity_display }}
+                    </span>
+                </div>
+
+                <!-- Progress Stepper -->
+                <div class="tracking-stepper my-3">
+                    <div class="step-item {% if report.status in 'REPORTED,SEARCHING,DISPATCHED,ADMITTED,RESOLVED' %}completed{% endif %}">
+                        <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+                        <div class="step-text">
+                            <strong>Emergency Reported</strong>
+                            <small class="text-muted d-block">{{ report.created_at|date:"d M, H:i" }}</small>
+                        </div>
+                    </div>
+                    <div class="step-item {% if report.status in 'DISPATCHED,ADMITTED,RESOLVED' %}completed{% elif report.status == 'SEARCHING' %}active{% endif %}">
+                        <div class="step-circle"><i class="fa-solid fa-truck-fast"></i></div>
+                        <div class="step-text">
+                            <strong>Ambulance Dispatched</strong>
+                            <small class="text-muted d-block">{% if report.ambulance_assigned %}Driver: {{ report.ambulance_driver_name }} (ETA ~{{ report.eta_minutes }} mins){% else %}Searching nearby team{% endif %}</small>
+                        </div>
+                    </div>
+                    <div class="step-item {% if report.status in 'ADMITTED,RESOLVED' %}completed{% endif %}">
+                        <div class="step-circle"><i class="fa-solid fa-hospital"></i></div>
+                        <div class="step-text">
+                            <strong>Arrived at Hospital</strong>
+                            <small class="text-muted d-block">{{ report.assigned_hospital.name|default:"Partner Clinic" }}</small>
+                        </div>
+                    </div>
+                    <div class="step-item {% if report.status == 'RESOLVED' %}completed{% endif %}">
+                        <div class="step-circle"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <div class="step-text">
+                            <strong>Rescued & Recovered</strong>
+                            <small class="text-muted d-block">Case closed successfully</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assigned Hospital Contact -->
+                {% if report.assigned_hospital %}
+                <div class="p-3 bg-light rounded-3 border mt-3">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-hospital text-primary me-1"></i> {{ report.assigned_hospital.name }}</h6>
+                    <p class="small text-muted mb-2">{{ report.assigned_hospital.address }}, {{ report.assigned_hospital.city }}</p>
+                    <div class="d-flex gap-2">
+                        <a href="tel:{{ report.assigned_hospital.phone }}" class="btn btn-outline-dark btn-sm flex-fill"><i class="fa-solid fa-phone me-1"></i> Call Clinic</a>
+                        <a href="https://wa.me/{{ report.assigned_hospital.whatsapp|default:report.assigned_hospital.phone|cut:' '|cut:'+' }}" target="_blank" class="btn btn-success btn-sm flex-fill"><i class="fa-brands fa-whatsapp me-1"></i> WhatsApp</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Live Route Map -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-map-location-dot text-primary me-2"></i> Live Rescue Route</h5>
+                    <span class="badge bg-success-subtle text-success border border-success"><i class="fa-solid fa-satellite-dish me-1"></i> Live GPS Feed</span>
+                </div>
+                <div id="liveTrackingMap" class="rounded-3 shadow-sm" style="height: 380px;"></div>
+                <div class="d-flex justify-content-between align-items-center mt-3 small text-muted">
+                    <span><i class="fa-solid fa-location-dot text-danger me-1"></i> <strong>Animal Location:</strong> {{ report.address_text|default:"Pinned GPS" }}</span>
+                    <span><i class="fa-solid fa-ambulance text-primary me-1"></i> <strong>Ambulance:</strong> En Route (~{{ report.eta_minutes }}m)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif query_id %}
+    <div class="text-center py-5">
+        <i class="fa-solid fa-magnifying-glass fa-3x text-muted mb-3"></i>
+        <h5>No record found for "{{ query_id }}"</h5>
+        <p class="text-muted">Please double check your 8-digit case ID or report a new emergency.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if report %}
+<script>
+    const CASE_ID = "{{ report.report_id }}";
+    const ANIMAL_LAT = {{ report.latitude }};
+    const ANIMAL_LNG = {{ report.longitude }};
+    const AMB_LAT = {{ report.ambulance_lat|default:report.latitude }};
+    const AMB_LNG = {{ report.ambulance_lng|default:report.longitude }};
+</script>
+<script src="/static/js/live_tracker.js"></script>
+{% endif %}
+{% endblock %}
